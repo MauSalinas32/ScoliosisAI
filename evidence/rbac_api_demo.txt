@@ -1,0 +1,22 @@
+== Step 1 of the login returns no token
+POST /auth/login -> HTTP 200, body keys: ['expires_in_minutes', 'status', 'username']
+
+== A technician uploads and classifies; the result is pending_review
+prediction 2: NO SCOLIOSIS (stored status: pending_review)
+
+== Confirming a diagnosis directly through the API (the UI is not involved)
+technician  POST /results/{id}/review                          -> HTTP 403
+admin       POST /results/{id}/review                          -> HTTP 403
+no token    POST /results/{id}/review                          -> HTTP 401
+record after the refused attempts: status = pending_review
+radiologist POST /results/{id}/review                          -> HTTP 200
+record after the radiologist's review: status = confirmed
+
+== Other endpoints without credentials or with the wrong role
+anonymous   GET  /results                                      -> HTTP 401
+anonymous   GET  /images                                       -> HTTP 401
+anonymous   GET  /audit                                        -> HTTP 401
+technician  GET  /results                                      -> HTTP 403
+technician  GET  /audit                                        -> HTTP 403
+radiologist GET  /audit                                        -> HTTP 403
+admin       GET  /audit                                        -> HTTP 200

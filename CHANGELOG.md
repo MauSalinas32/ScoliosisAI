@@ -26,8 +26,11 @@ Corrections found by auditing the 3.2.0 code against the Milestone 3 feedback (e
   - `kustomization.yaml` no longer applies `secret.example.yaml` (it would overwrite the real secret with placeholders).
   - Dockerfile installs the wheelhouse through a bind mount (no 2 GB layer); `medmnist` (unused, pulled PyTorch + CUDA) removed; test tools moved to `requirements-dev.txt`.
   - `.gitignore` / `.dockerignore` added; `medical_system.db`, `reports/*.pdf` and `k8s/secret.yaml` removed from version control.
+  - Central exception-to-HTTP mapping (`api/error_handlers.py`); unexpected errors and report generation no longer return internal text or server paths to the client.
+  - Docker image: numeric UID/GID 10001 (matches the Kubernetes `securityContext`), one worker per container (TensorFlow memory against the 2 GiB pod limit); namespace labelled for Pod Security Admission (warn/audit `restricted`); ingress rate limit; `matplotlib` added to `requirements-dev.txt` (needed by `plot_confusion_matrix.py`).
+  - Benchmark: the bottleneck is derived from the measurement (the old file always named inference although preprocessing was larger); `--iterations` / `--output` options; new `forward_pass_comparison.py` and `scripts/process_scaling.py`.
   - `.github/workflows/ci-cd.yml` added (lint, bandit, tests with coverage gate on SQLite and PostgreSQL, Docker smoke test, 2-replica test, Trivy, kubeconform, kind staging); `scripts/replica_test.sh` and `scripts/load_test.py` provide the replica / load evidence.
-- **Tests**: 122 tests (was 102), all passing from a clean clone; the suite now runs in an isolated temporary directory with the standard FastAPI `TestClient` (the home-made ASGI driver failed with other httpx versions and the tests wrote into the project's database).
+- **Tests**: 189 tests (was 102), 79 % coverage, all passing from a clean clone; the suite now runs in an isolated temporary directory with the standard FastAPI `TestClient` (the home-made ASGI driver failed with other httpx versions and the tests wrote into the project's database).
 
 ## [3.2.0] - Milestone 3 Consolidated: Model v1.1.0 Validation, Memory Optimization & Hardened RBAC
 - **AI Model Iteration `v1.1.0` & Quality Gate (Criterion 3 — Questions 1, 2, 9 & 10):**

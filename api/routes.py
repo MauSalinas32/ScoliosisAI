@@ -556,8 +556,9 @@ def create_router(
             raise HTTPException(status_code=422, detail=str(e))
         except (StorageError, FileNotFoundError) as e:
             raise HTTPException(status_code=404, detail=f"Original image file not found in storage: {str(e)}")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Classification failed: {str(e)}")
+        except Exception:
+            get_logger("API").exception(f"Classification of image {image_id} failed")
+            raise HTTPException(status_code=500, detail="Classification failed. See the server log.")
 
     @router.get("/model/info", tags=["AI Classification"])
     async def get_model_info(authorization: Optional[str] = Header(None)):
@@ -717,14 +718,14 @@ def create_router(
             filename = Path(report_path).name
             return {
                 "message": "Report generated",
-                "path": report_path,
                 "filename": filename,
                 "download_url": f"/api/v1/reports/{filename}",
             }
         except ValueError as e:
             raise HTTPException(status_code=404, detail=str(e))
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        except Exception:
+            get_logger("API").exception("Report generation failed")
+            raise HTTPException(status_code=500, detail="Report generation failed. See the server log.")
 
     @router.get("/reports/{filename}", tags=["Clinical Results"])
     async def download_report_file(

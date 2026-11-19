@@ -52,7 +52,8 @@ RUN --mount=type=bind,from=builder,source=/build/wheels,target=/wheels \
     pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.txt
 
 # Create dedicated non-root application user for clinical data security compliance
-RUN groupadd -r medicalgroup && useradd -r -g medicalgroup -d /app medicaluser
+# Numeric UID/GID 10001: identical to the Kubernetes securityContext (runAsUser/fsGroup) so volume ownership matches
+RUN groupadd --gid 10001 medicalgroup && useradd --uid 10001 --gid 10001 --no-create-home --home-dir /app --shell /usr/sbin/nologin medicaluser
 
 # Copy application source code
 COPY . /app/
@@ -62,7 +63,7 @@ RUN mkdir -p /app/data/uploads /app/data/processed /app/data/models /app/data/re
     chown -R medicaluser:medicalgroup /app
 
 # Switch to non-root user
-USER medicaluser
+USER 10001:10001
 
 # Expose internal API service port
 EXPOSE 8000
@@ -71,5 +72,6 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Launch production server via Uvicorn with standard ASGI workers
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+# One worker per container: TensorFlow already uses the pod's cores for one forward pass and every worker would
+# load its own copy of the model (about 0.8 GB). Capacity grows with replicas (HPA), not with workers.
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

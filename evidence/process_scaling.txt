@@ -1,0 +1,4 @@
+1 process(es): 10.81 req/s  speed-up 1.0x  efficiency 100%  error rate 0.0
+2 process(es): 21.7 req/s  speed-up 2.01x  efficiency 100%  error rate 0.0
+4 process(es): 41.67 req/s  speed-up 3.85x  efficiency 96%  error rate 0.0
+6 process(es): 41.06 req/s  speed-up 3.8x  efficiency 63%  error rate 0.0

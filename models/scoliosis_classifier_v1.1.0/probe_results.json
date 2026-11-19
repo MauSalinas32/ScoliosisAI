@@ -1,0 +1,73 @@
+{
+  "images": [
+    "black",
+    "white",
+    "uniform noise",
+    "horizontal gradient",
+    "checkerboard",
+    "straight spine",
+    "spine +30 px (C)",
+    "spine -30 px (C)"
+  ],
+  "probabilities": [
+    [
+      0.9994,
+      0.0006,
+      0.0
+    ],
+    [
+      0.473,
+      0.0122,
+      0.5148
+    ],
+    [
+      0.1066,
+      0.0278,
+      0.8656
+    ],
+    [
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0002,
+      0.0163,
+      0.9835
+    ],
+    [
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.9737,
+      0.0251,
+      0.0012
+    ],
+    [
+      0.9762,
+      0.0238,
+      0.0
+    ]
+  ],
+  "class_names": [
+    "NO SCOLIOSIS",
+    "SERIOUS SCOLIOSIS (C-CURVE)",
+    "SEVERE SCOLIOSIS (S-CURVE)"
+  ],
+  "probability_full_range_per_class": [
+    0.9998,
+    0.0278,
+    0.9835
+  ],
+  "probability_trimmed_range_per_class": [
+    0.8934,
+    0.0251,
+    0.8656
+  ],
+  "max_probability_range": 0.8934,
+  "distinct_predicted_classes": 2,
+  "min_required_range": 0.1,
+  "input_insensitive": false
+}

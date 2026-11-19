@@ -1,0 +1,2508 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\geometry{a4paper, margin=2.5cm}
+
+\usepackage[table]{xcolor}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=verdeUAEM,
+    urlcolor=verdeUAEM,
+    citecolor=verdeUAEM,
+}
+\usepackage{csquotes}
+\usepackage{tabularx}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, shapes.multipart, arrows.meta, positioning, fit, calc, backgrounds, shadows}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{pifont}
+\usepackage{xurl}            % \fp{} breaks long file paths anywhere
+\newcommand{\fp}[1]{\nolinkurl{#1}}
+\usepackage{etoolbox}
+\AtBeginEnvironment{tabularx}{\small}
+\AtBeginEnvironment{longtable}{\footnotesize}
+
+% UAEM Institutional Colors
+\definecolor{verdeUAEM}{RGB}{0,98,65}
+\definecolor{oroUAEM}{RGB}{197,165,90}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{lightgreen}{RGB}{220,240,230}
+\definecolor{lightyellow}{RGB}{255,253,220}
+\definecolor{lightblue}{RGB}{220,230,250}
+\definecolor{lightred}{RGB}{250,225,225}
+
+\newcommand{\yes}{\textcolor{verdeUAEM}{\ding{51}}}
+\newcommand{\no}{\textcolor{red!70!black}{\ding{55}}}
+
+% Listings configuration
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+% Title Format
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{verdeUAEM}}
+  {\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{verdeUAEM!80!black}}
+  {\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{verdeUAEM}}
+  {\thesubsubsection}{1em}{}
+
+% Table column types
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+% Table header helper
+\newcommand{\hd}[1]{\textcolor{white}{\textbf{#1}}}
+
+% Headers and Footers
+\setlength{\headheight}{25pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\nouppercase{\leftmark}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{oroUAEM}\leaders\hrule height 0.4pt\hfill}}
+
+% Common TikZ styles
+\tikzset{
+    arrow/.style={-{Stealth[length=4pt]}, thick, color=verdeUAEM!70},
+    redarrow/.style={-{Stealth[length=4pt]}, thick, color=red!70},
+    dasharrow/.style={-{Stealth[length=4pt]}, dashed, thick, color=oroUAEM!90!black},
+    lbl/.style={font=\tiny\bfseries, color=verdeUAEM!80!black},
+}
+
+\begin{document}
+
+% ========== COVER PAGE ==========
+\begin{titlepage}
+    \centering
+    \vspace*{0.5cm}
+
+    \textcolor{verdeUAEM}{\rule{\linewidth}{2pt}}
+    \vspace{0.3cm}
+    {\Huge\bfseries\color{verdeUAEM} Autonomous University \\[0.2cm]
+     of the State of Mexico \par}
+    \vspace{0.3cm}
+    {\Large\bfseries\color{oroUAEM} Faculty of Engineering \par}
+
+    \vspace{1cm}
+    \textcolor{oroUAEM}{\rule{0.6\linewidth}{1pt}}
+    \vspace{0.5cm}
+
+    {\Large Software Engineering II \par}
+    {\large Teacher: M.\ En Ing.\ Jessica Cortes \par}
+
+    \vspace{0.8cm}
+    \textcolor{verdeUAEM}{\rule{0.4\linewidth}{0.5pt}}
+    \vspace{0.5cm}
+
+    {\huge\bfseries\color{verdeUAEM} AI Scoliosis Detection \& Classification System \par}
+    \vspace{0.3cm}
+    {\Large Final Deliverable --- Milestones 1 to 4 \par}
+    \vspace{0.2cm}
+    {\large System version 3.3.0 \par}
+
+    \vspace{1.3cm}
+    {\large\bfseries\color{oroUAEM} Team 3 \par}
+    \vspace{0.3cm}
+    \begin{tabular}{c}
+        Aguilar Gardu\~{n}o Daniel \\
+        Hern\'{a}ndez Gonz\'{a}lez Sebasti\'{a}n \\
+        Guti\'{e}rrez Orea Kevin Oswaldo \\
+        Salinas Jim\'{e}nez Mauro \\
+        Zepeda Ju\'{a}rez Alondra Nahomi
+    \end{tabular}
+
+    \vspace{1cm}
+    {\large B.\ Eng.\ in Artificial Intelligence \\ Group A2 --- 2026 B \par}
+    \vspace{0.5cm}
+    {\large Toluca, State of Mexico, November 2026 \par}
+
+    \vfill
+    \textcolor{oroUAEM}{\rule{\linewidth}{1pt}}
+\end{titlepage}
+
+% === Transparency Note Footer Style ===
+\fancypagestyle{notatransparencia}{
+    \fancyhf{}
+    \fancyhead[L]{\nouppercase{\leftmark}}
+    \renewcommand{\headrulewidth}{0.4pt}
+    \renewcommand{\headrule}{\hbox to\headwidth{\color{oroUAEM}\leaders\hrule height 0.4pt\hfill}}
+    \fancyfoot[C]{
+        \footnotesize \textit{\textbf{Transparency Note:} Approximately 15 percent of the drafting and translation of this document was supported by artificial intelligence tools. The analysis, design, and technical decision-making are 100 percent the team's original work.} \\[1ex]
+        \normalsize \thepage
+    }
+}
+
+\tableofcontents
+\thispagestyle{notatransparencia}
+\newpage
+
+% ==========================================
+\section*{How to Read This Document}
+\addcontentsline{toc}{section}{How to Read This Document}
+
+This is the consolidated deliverable of the four milestones. Every class name, file path, number and
+diagram refers to the code in the repository at version \textbf{3.3.0} (repository
+\texttt{MauSalinas32/ScoliosisAI}). Three conventions keep the artefacts aligned:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Requirement identifiers.} The source code cites requirements in its docstrings with
+          the Spanish prefixes \texttt{RF-xx} (functional), \texttt{RNF-xx} (non-functional) and
+          \texttt{RD-xx} (domain rule). In this document \texttt{FR-xx} $\equiv$ \texttt{RF-xx} and
+          \texttt{NFR-xx} $\equiv$ \texttt{RNF-xx}, with the same numbers.
+    \item \textbf{Evidence.} Every measured value comes from a script in the repository; the raw outputs
+          are in \fp{evidence/} (test run, benchmark, replica test, process scaling, RBAC demonstration) and in
+          \fp{models/<version>/} (evaluation and probe of each model version).
+          Screenshots in this document were captured from the running system.
+    \item \textbf{Scope statement.} Features are classified as \emph{Implemented}, \emph{Tested} or
+          \emph{Planned} (Table~\ref{tab:tiers}). Milestone~4 adds the ethical, legal and social analysis
+          (Part~IV) and documents the corrections made to the software after the Milestone~3 review.
+\end{itemize}
+
+% ==========================================
+% MILESTONE 1: THEORETICAL DESIGN
+% ==========================================
+\newpage
+\section*{MILESTONE 1: THEORETICAL DESIGN}
+\addcontentsline{toc}{section}{MILESTONE 1: THEORETICAL DESIGN}
+
+\section{Problem Statement and Objectives}
+
+\subsection{Problem Context}
+
+Scoliosis is a three-dimensional deformity of the spine characterised by a lateral curvature of the
+spinal column. Reported prevalence of adolescent idiopathic scoliosis ranges between 0.47\% and 5.2\%
+depending on the population (Konieczny et al., 2013). Early detection matters: in the BrAIST
+randomised trial, bracing prevented progression to the surgical threshold in 72\% of treated
+adolescents versus 48\% under observation (Weinstein et al., 2013). Late diagnosis may require
+spinal fusion surgery.
+
+The traditional diagnostic path relies on a specialist reading an anteroposterior (AP) spinal
+radiograph. This process has three weaknesses: (1) dependence on the reader's experience, which
+introduces inter-observer variability; (2) scarcity of specialists, which creates waiting lists in
+public healthcare; and (3) heterogeneous, poorly traceable documentation of each study.
+
+The proposed system is a \textbf{clinical decision-support tool}, not a replacement for the physician:
+it classifies AP spinal radiographs into three categories, estimates the curve apex and affected
+levels, flags uncertain predictions for mandatory review, and generates a structured, auditable report
+that a radiologist must confirm or correct.
+
+\subsection{Stakeholders}
+
+\begin{table}[H]
+\centering
+\caption{Stakeholders and their interest in the system. The first four are also system actors (roles).}
+\label{tab:stakeholders}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{L{3.6cm} C{1.4cm} Y}
+\rowcolor{verdeUAEM}
+\hd{Stakeholder} & \hd{Actor} & \hd{Interest} \\
+\rowcolor{lightgreen}
+Imaging technician & \yes & Upload studies quickly; immediate feedback when an image is invalid. \\
+Radiologist / specialist & \yes & Reliable second opinion; ability to confirm or correct; signed report. \\
+\rowcolor{lightgreen}
+System administrator & \yes & Account management, audit trail, secure operation. \\
+ML engineer & \yes & Train, evaluate and promote model versions without touching clinical code. \\
+\rowcolor{lightgreen}
+Patients & \no & Earlier, consistent diagnosis; privacy of their data. \\
+IT department / hospital administration & \no & Maintainable, containerised deployment; regulatory traceability. \\
+\end{tabularx}
+\end{table}
+
+\subsection{Project Objectives}
+
+\textbf{General objective:} design, implement, validate and deploy a modular software system that uses
+a convolutional neural network (CNN) to classify scoliosis from spinal radiographs, following software
+engineering standards (SOLID, design patterns, automated testing, CI/CD, containerisation).
+
+\textbf{Specific objectives} (status at version 3.3.0 in brackets):
+\begin{enumerate}[leftmargin=*, label=O\arabic*.]
+    \item Modular architecture with inverted dependencies that allows replacing the AI model without
+          changing the services. \textit{[met --- Section~\ref{sec:arch}]}
+    \item Fail-Fast preprocessing pipeline composed of independent stages. \textit{[met --- Section~\ref{sec:pipeline}]}
+    \item Fine-tune MobileNetV2 on the Roboflow \emph{scoliosis2} radiograph dataset. \textit{[met: v1.1.0 trained, evaluated and approved --- Section~\ref{sec:c3}]}
+    \item Reach a macro-F1 $\geq 0.70$ with sensitivity $\geq 0.60$ for every class, enforced by an
+          automatic quality gate.\footnote{The Milestone~1 draft stated ``80\% accuracy''. Accuracy is
+          misleading under class imbalance (a model that always answers ``C-curve'' scores 44.6\%), so
+          the objective was restated in terms of macro-F1 and per-class sensitivity, which is exactly what
+          \fp{ai/metrics.py::passes_quality_gate} checks.} \textit{[met: v1.1.0 passes the gate; v1.0.0 was rejected by it]}
+    \item GitHub Actions pipeline with automated tests, image build, security scan and deployment test. \textit{[met --- Section~\ref{sec:c4}]}
+    \item Docker image (multi-stage, non-root) and Kubernetes manifests with autoscaling. \textit{[met --- Section~\ref{sec:c5}]}
+    \item Machine-readable evidence (JSON artefacts, test reports) for every reported number. \textit{[met --- Section~\ref{sec:c7}]}
+\end{enumerate}
+
+\section{Functional and Non-Functional Requirements}
+
+\subsection{Functional Requirements}
+
+\begin{longtable}{C{1.1cm} L{2.6cm} p{6.4cm} L{3.4cm}}
+\caption{Functional requirements and the code that implements each one.}\label{tab:functional}\\
+\rowcolor{verdeUAEM}
+\hd{ID} & \hd{Requirement} & \hd{Description} & \hd{Implemented in} \\
+\endfirsthead
+\rowcolor{verdeUAEM}
+\hd{ID} & \hd{Requirement} & \hd{Description} & \hd{Implemented in} \\
+\endhead
+\rowcolor{lightgreen}
+FR-01 & Authentication, 2FA and RBAC & Users log in with password plus a 6-digit one-time code; the JWT is issued only after the code is verified. Four roles with differentiated permissions (Table~\ref{tab:rbac}). & \fp{services/auth_service.py}, \texttt{api/routes.py} \\
+FR-02 & Image upload & Accept JPEG, PNG, TIFF and DICOM; at most 15\,MB; between 32 and 8192 pixels per side. & \fp{image_management_service.py} \\
+\rowcolor{lightgreen}
+FR-03 & Fail-Fast validation & Reject invalid files immediately with a specific message (format, size, corruption, dimensions, non-radiographic content). & \fp{pipeline/stages.py::ValidationStage} \\
+FR-04 & Preprocessing & Quality assessment, resizing to 224$\times$224 and normalisation to $[0,1]$ on a working copy. & \fp{preprocessing_service.py} \\
+\rowcolor{lightgreen}
+FR-05 & AI classification & Classify into NO ESCOLIOSIS, ESCOLIOSIS GRAVE (EN C) or ESCOLIOSIS SEVERA (EN S) with the CNN. & \fp{inference_service.py}, \fp{inference_strategy.py} \\
+FR-06 & Confidence and review flag & Return the softmax probability of every class and flag low-confidence or inconsistent predictions. & \fp{inference_strategy.py} \\
+\rowcolor{lightgreen}
+FR-07 & Result visualisation & Show diagnosis, probabilities, curve type, apex and affected levels. & \fp{frontend/index.html} \\
+FR-08 & Result persistence & Store every prediction with model name and version. & \fp{infrastructure/repositories.py} \\
+\rowcolor{lightgreen}
+FR-09 & Clinical review & A radiologist confirms or corrects each prediction; the reviewer is taken from the JWT. & \fp{clinical_results_service.py} \\
+FR-10 & PDF report & Bilingual (ES/EN) report with Mexico City time and a decision-support disclaimer. & \fp{clinical_results_service.py} \\
+\rowcolor{lightgreen}
+FR-11 & History & List and filter predictions (e.g.\ \texttt{pending\_review}). & \texttt{GET /api/v1/results} \\
+FR-12 & Model versioning & Register, approve and activate model versions; only approved versions serve predictions. & \fp{infrastructure/model_registry.py} \\
+\end{longtable}
+
+\subsection{Non-Functional Requirements}
+
+\begin{longtable}{C{1.2cm} L{2.2cm} p{6.6cm} L{3.4cm}}
+\caption{Non-functional requirements, acceptance metric and measured status.}\label{tab:nonfunctional}\\
+\rowcolor{verdeUAEM}
+\hd{ID} & \hd{Attribute} & \hd{Requirement / metric} & \hd{Status (evidence)} \\
+\endfirsthead
+\rowcolor{verdeUAEM}
+\hd{ID} & \hd{Attribute} & \hd{Requirement / metric} & \hd{Status (evidence)} \\
+\endhead
+\rowcolor{lightgreen}
+NFR-01 & Performance & P95 end-to-end latency $<$ 500\,ms for a 1024$\times$1024 image on 4 vCPU. & \yes\ service layer P95 100.7\,ms; HTTP P95 465\,ms with 4 concurrent clients per 2-CPU replica (Sections~\ref{sec:c6}, \ref{sec:replicatest}) \\
+NFR-02 & Scalability & Horizontal scaling 2--6 replicas sharing PostgreSQL and RWX storage. & \yes\ 2-replica test (Section~\ref{sec:replicatest}); 6 replicas not measured \\
+\rowcolor{lightgreen}
+NFR-03 & Security & bcrypt hashing, JWT HS256 (60\,min), 2FA, RBAC on every endpoint, non-root container. & \yes\ \texttt{test\_auth\_service}, RBAC tests \\
+NFR-04 & Privacy & Direct identifiers erased from a DICOM file before it is stored and masked in the metadata; no runtime data inside the image. & \yes\ \fp{test_stored_dicom_is_scrubbed} \\
+\rowcolor{lightgreen}
+NFR-05 & Maintainability & DIP across layers; test coverage $\geq$ 75\% enforced in CI. & \yes\ 79\% (189 tests) \\
+NFR-06 & Availability & Zero-downtime rolling updates, liveness/readiness/startup probes, PDB. & \yes\ design; runs in CI (kind) \\
+\rowcolor{lightgreen}
+NFR-07 & Portability & Same image on any Docker host; configuration only through environment variables. & \yes\ image tested \\
+NFR-08 & Model quality & Macro-F1 $\geq$ 0.70 and sensitivity $\geq$ 0.60 per class on the test split. & \yes\ v1.1.0: macro-F1 88.07\%, lowest sensitivity 82.61\% (Section~\ref{sec:c3}) \\
+\rowcolor{lightgreen}
+NFR-09 & Auditability & Append-only audit trail of every clinical action with user and UTC time. & \yes\ E2E test \\
+\end{longtable}
+
+\subsection{Domain Rules}
+
+\begin{table}[H]
+\centering
+\caption{Domain rules (\texttt{RD-xx}) referenced in the code.}
+\label{tab:rd}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{C{1.3cm} Y L{4.6cm}}
+\rowcolor{verdeUAEM}
+\hd{ID} & \hd{Rule} & \hd{Enforced by} \\
+\rowcolor{lightgreen}
+RD-02 & Protected health information is removed before the image reaches the AI engine and before a DICOM file is stored. & \fp{AnonymizationStage}, \fp{anonymize_dicom_bytes} \\
+RD-04 & Audit entries are immutable: the repository exposes no update or delete. & \texttt{AuditRepository} \\
+\rowcolor{lightgreen}
+RD-09 & Images must meet minimum quality standards (contrast, brightness). & \texttt{QualityCheckStage} \\
+RD-10 & Every prediction is traceable to a registered model version. & \texttt{ModelRegistry}, \fp{prediction_results.model_version} \\
+\rowcolor{lightgreen}
+RD-13 & The uploaded pixel data is preserved unmodified (identifiers are removed from DICOM metadata); processing uses a working copy. & \fp{LocalStorageAdapter}, \fp{NormalizationStage} \\
+\end{tabularx}
+\end{table}
+
+\section{System Architecture Design}
+\label{sec:arch}
+
+\subsection{Architectural Style: Modular Monolith with Dependency Inversion}
+
+The system is a \textbf{modular monolith}: one deployable process organised in layers
+(presentation $\to$ application services $\to$ domain $\leftarrow$ infrastructure). Services depend only
+on abstract base classes declared in \fp{domain/interfaces/contracts.py} (Python \texttt{abc.ABC});
+concrete implementations are created and injected in a single \emph{composition root},
+\fp{main.py::create_application()}.
+
+\begin{table}[H]
+\centering
+\caption{Architectural alternatives considered (answer to Milestone~1 feedback on over-engineering).}
+\label{tab:archalt}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{L{2.6cm} Y Y}
+\rowcolor{verdeUAEM}
+\hd{Criterion} & \hd{Microservices + broker (M1 draft)} & \hd{Modular monolith (adopted)} \\
+\rowcolor{lightgreen}
+Team size / scope & Six services, a broker and an API gateway for a four-person team and one model. & One codebase; module boundaries enforced by interfaces. \\
+Measured bottleneck & Would justify a separate inference service only with dedicated GPUs. & CPU-bound inference scales by adding identical replicas (Section~\ref{sec:c6}). \\
+\rowcolor{lightgreen}
+Consistency & Distributed transactions or sagas between services. & Local ACID transactions in PostgreSQL. \\
+Failure isolation & Process isolation per service. & Achieved with replicas, readiness probes and timeouts; a failing pod leaves the Service. \\
+\rowcolor{lightgreen}
+Evolution path & --- & Interfaces allow extracting \texttt{InferenceService} later without changing callers. \\
+\end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    layer/.style={rectangle, rounded corners=6pt, draw=verdeUAEM, thick, fill=verdeUAEM!4, inner sep=7pt},
+    box/.style={rectangle, rounded corners=3pt, draw=verdeUAEM, fill=lightgreen,
+                text width=2.6cm, align=center, minimum height=1.0cm, font=\scriptsize},
+    ibox/.style={box, draw=oroUAEM!90!black, fill=lightyellow},
+    ext/.style={box, draw=gray, fill=lightblue},
+    db/.style={cylinder, shape border rotate=90, aspect=0.2, draw=gray, fill=lightblue,
+               minimum height=1.1cm, text width=2.4cm, align=center, font=\scriptsize},
+    llabel/.style={font=\scriptsize\bfseries\color{verdeUAEM}, rotate=90, anchor=south},
+    ]
+    % Presentation
+    \node[ext] (ui)   at (0,0)    {\textbf{Web UI}\\\texttt{frontend/index.html}};
+    \node[box] (api)  at (4.8,0)  {\textbf{API Gateway}\\\texttt{api/routes.py}\\JWT, RBAC, error mapping};
+    \node[box] (root) at (9.6,0)  {\textbf{Composition root}\\\texttt{main.py}};
+    % Application
+    \node[box] (auth) at (0,-2.4)   {\textbf{AuthService}};
+    \node[box] (img)  at (3.2,-2.4) {\textbf{ImageManagement Service}};
+    \node[box] (pre)  at (6.4,-2.4) {\textbf{Preprocessing Service}};
+    \node[box] (inf)  at (9.6,-2.4) {\textbf{InferenceService}};
+    \node[box] (cli)  at (1.6,-3.8) {\textbf{ClinicalResults Service}};
+    \node[box] (aud)  at (8.0,-3.8) {\textbf{AuditService}};
+    % Domain / AI
+    \node[ibox, fill=white] (dom) at (0,-6.0) {\textbf{Domain}\\entities + ABC interfaces\\(\texttt{contracts.py})};
+    \node[ibox] (pipe) at (4.8,-6.0) {\textbf{AIPipeline}\\4 \texttt{IPipelineStage}s};
+    \node[ibox] (fact) at (9.6,-6.0) {\textbf{ModelFactory}\\Logging + Metrics decorators};
+    \node[ibox] (strat) at (9.6,-7.4) {\textbf{ScoliosisStrategy}\\MobileNetV2, \texttt{tf.function}};
+    % Infrastructure
+    \node[box] (repo) at (0,-9.6)   {\textbf{Repositories}\\SQLAlchemy};
+    \node[box] (stor) at (3.2,-9.6) {\textbf{LocalStorage Adapter}};
+    \node[box] (reg)  at (9.6,-9.6) {\textbf{ModelRegistry}};
+    \node[db]  (sql)  at (6.4,-11.1) {SQLite (dev)\\PostgreSQL (prod)};
+    \node[db]  (vol)  at (3.2,-11.1) {\texttt{/app/data}\\images, reports};
+    \node[db]  (mod)  at (9.6,-11.1) {\texttt{/app/models}\\\texttt{model.keras}};
+
+    \begin{scope}[on background layer]
+        \node[layer, fit=(ui)(api)(root)] (L1) {};
+        \node[layer, fit=(auth)(inf)(cli)(aud)] (L2) {};
+        \node[layer, fit=(dom)(pipe)(fact)(strat)] (L3) {};
+        \node[layer, fit=(repo)(reg)(sql)(vol)(mod)] (L4) {};
+    \end{scope}
+    \node[llabel] at (L1.west) {Presentation};
+    \node[llabel] at (L2.west) {Application};
+    \node[llabel] at (L3.west) {Domain / AI};
+    \node[llabel] at (L4.west) {Infrastructure};
+
+    \draw[arrow] (ui) -- node[lbl, above]{HTTPS} (api);
+    \coordinate (bus) at (4.8,-1.2);
+    \draw[arrow] (api.south) -- (bus) -| (auth.north);
+    \draw[arrow] (bus) -| (img.north);
+    \draw[arrow] (bus) -| (pre.north);
+    \draw[arrow] (bus) -| (inf.north);
+    \draw[arrow] (bus) -| (cli.north);
+    \draw[arrow] (bus) -- ++(3.2,0) -| (aud.north);
+    \draw[arrow] (img.south) -- ++(0,-0.25) -| node[lbl, pos=0.75, left]{uses} ([xshift=-4mm]pipe.north);
+    \draw[arrow] (pre.south) |- ++(0,-1.75) -| ([xshift=4mm]pipe.north);
+    \draw[arrow] (inf.south) -- ++(0,-0.25) -| (11.15,-4.7) |- node[lbl, pos=0.25, right]{creates} (fact.east);
+    \draw[arrow] (fact) -- node[lbl, right]{wraps} (strat);
+    \draw[dasharrow] (L2.south west) ++(1.2,0) -- node[lbl, right]{depends on interfaces} ([xshift=1.2cm]dom.north west);
+    \draw[dasharrow] (repo.north) -- node[lbl, right]{implements} (dom.south);
+    \draw[dasharrow] (stor.north) -- (dom.south east);
+    \draw[arrow] (repo.south) |- (sql.west);
+    \draw[arrow] (reg.south west) -- (sql.north east);
+    \draw[arrow] (stor) -- (vol);
+    \draw[arrow] (reg) -- (mod);
+    \draw[arrow] (strat.east) -- ++(1.0,0) |- node[lbl, pos=0.25, right]{weights of active version} (reg.east);
+    \draw[dasharrow] (root.east) -- ++(0.9,0) |- node[lbl, pos=0.2, right]{injects} (inf.east);
+\end{tikzpicture}}
+\caption{Layered architecture. Solid arrows are calls; dashed arrows are ``implements'', ``depends on
+interface'' or dependency injection. \texttt{ImageManagementService} runs the validation and anonymisation
+stages and \texttt{PreprocessingService} the quality and normalisation stages of the same \texttt{AIPipeline}. Services only see the abstract interfaces of the domain layer; the composition root
+(\texttt{main.py}) wires concrete repositories, storage and registry into them. The model artefact lives
+in \texttt{/app/models}, outside the persistent data volume.}
+\label{fig:architecture}
+\end{figure}
+
+\subsection{The Six Canonical Services}
+
+\begin{table}[H]
+\centering
+\caption{Responsibility and injected dependencies of each service (constructor signatures in the code).}
+\label{tab:services}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{L{3.3cm} Y L{4.3cm}}
+\rowcolor{verdeUAEM}
+\hd{Service (file)} & \hd{Responsibility} & \hd{Depends on (injected)} \\
+\rowcolor{lightgreen}
+\texttt{AuthService} \newline\scriptsize\texttt{auth\_service.py} & Registration, credential check, 2FA codes, JWT, RBAC, password recovery. & \texttt{IUserRepository}, \texttt{IAuditRepository}, \fp{OneTimeCodeRepository} \\
+\fp{ImageManagementService} \newline\scriptsize\fp{image_management_service.py} & Upload, Fail-Fast validation, anonymisation, storage of the original, image metadata. & \texttt{IImageRepository}, \texttt{IStorageAdapter}, \texttt{IAuditRepository} \\
+\rowcolor{lightgreen}
+\fp{PreprocessingService} \newline\scriptsize\fp{preprocessing_service.py} & Quality assessment and normalisation of a working copy. & \texttt{IAuditRepository} \\
+\texttt{InferenceService} \newline\scriptsize\fp{inference_service.py} & Load the approved model version; run the decorated inferencer; audit each classification. & \texttt{ModelRegistry}, \texttt{IAuditRepository}, strategy factory \\
+\rowcolor{lightgreen}
+\fp{ClinicalResultsService} \newline\scriptsize\fp{clinical_results_service.py} & Persist predictions, clinical review, history, bilingual PDF reports. & \texttt{IResultRepository}, \texttt{IImageRepository}, \texttt{IAuditRepository} \\
+\texttt{AuditService} \newline\scriptsize\texttt{audit\_service.py} & Append-only audit events (database + \texttt{audit.log}). & \texttt{IAuditRepository} \\
+\end{tabularx}
+\end{table}
+
+\section{Design Patterns Applied}
+\label{sec:patterns}
+
+\begin{table}[H]
+\centering
+\caption{Design patterns (Gamma et al., 1994; Fowler, 2002), where they are implemented and the problem they solve. Each pattern has a single role across all artefacts.}
+\label{tab:patterns}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{L{2.2cm} L{4.1cm} Y}
+\rowcolor{verdeUAEM}
+\hd{Pattern} & \hd{Classes (file)} & \hd{Problem solved} \\
+\rowcolor{lightgreen}
+Pipeline & \texttt{AIPipeline}, \texttt{IPipelineStage} and four stages (\texttt{pipeline/}) & Ordered, composable image processing with Fail-Fast stop at the first failing stage. Preprocessing is \emph{only} a pipeline, never a decorator. \\
+Strategy & \texttt{IMLStrategy} $\to$ \texttt{ScoliosisStrategy} (\fp{inference_strategy.py}) & Interchangeable classification algorithms; \texttt{InferenceService} receives a strategy factory and never names a concrete model. \\
+\rowcolor{lightgreen}
+Factory & \fp{ModelFactory.create_model} (\texttt{model\_factory.py}) & Encapsulates loading weights and assembling the decorator chain; caches one instance per model version. \\
+Decorator & \fp{LoggingInferencerDecorator}, \fp{MetricsInferencerDecorator} (\fp{inference_decorators.py}) & Adds logging/audit and latency metrics around \fp{IModelInferencer.predict} without modifying the model. \emph{Only} applied to inference. \\
+\rowcolor{lightgreen}
+Repository & \texttt{ImageRepository}, \texttt{ResultRepository}, \texttt{UserRepository}, \texttt{AuditRepository}, \fp{OneTimeCodeRepository} & Hides SQLAlchemy; the same services run on SQLite and PostgreSQL. \\
+Adapter & \texttt{IStorageAdapter} $\to$ \fp{LocalStorageAdapter} & File storage can move to object storage (S3/MinIO) without touching services. \\
+\rowcolor{lightgreen}
+Dependency Injection & \fp{create_application()} in \texttt{main.py} & Single place where concrete classes are instantiated (composition root). \\
+\end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\resizebox{0.95\textwidth}{!}{%
+\begin{tikzpicture}[
+    cls/.style={rectangle split, rectangle split parts=2, draw=verdeUAEM, fill=white,
+                rectangle split part fill={lightgreen,white}, font=\scriptsize, align=center,
+                text width=4.6cm, inner sep=3pt},
+    iface/.style={cls, rectangle split part fill={lightyellow,white}, draw=oroUAEM!90!black},
+    real/.style={-{Triangle[open, length=6pt]}, dashed, thick, color=gray!70!black},
+    assoc/.style={-{Stealth[length=5pt]}, thick, color=verdeUAEM!70},
+    wrap/.style={-{Diamond[open, length=7pt]}, thick, color=verdeUAEM!70},
+    ]
+    \node[iface] (imi) at (0,0) {\textless\textless interface\textgreater\textgreater\\\textbf{IModelInferencer}
+        \nodepart{second} + predict(image, **kw) : dict};
+    \node[cls] (base) at (-6,-3) {\textbf{BaseModelInferencer}
+        \nodepart{second} - strategy : IMLStrategy\\+ predict()};
+    \node[cls] (logd) at (0,-3) {\textbf{LoggingInferencerDecorator}
+        \nodepart{second} - wrapped : IModelInferencer\\+ predict()};
+    \node[cls] (metd) at (6,-3) {\textbf{MetricsInferencerDecorator}
+        \nodepart{second} - wrapped : IModelInferencer\\- latency : deque(1000)\\+ predict()};
+    \node[iface] (iml) at (-6,-6.2) {\textless\textless interface\textgreater\textgreater\\\textbf{IMLStrategy}
+        \nodepart{second} + classify()\\+ load\_model(path)\\+ get\_model\_info()};
+    \node[cls] (sco) at (-6,-9.3) {\textbf{ScoliosisStrategy}
+        \nodepart{second} - forward : tf.function\\+ classify() : softmax + flags};
+    \node[cls] (fac) at (2.5,-6.6) {\textbf{ModelFactory}
+        \nodepart{second} + create\_model(strategy, name,\\version, path) : IModelInferencer};
+    \node[cls] (svc) at (2.5,-9.6) {\textbf{InferenceService}
+        \nodepart{second} - inferencer : IModelInferencer\\+ load\_model()\\+ classify()};
+
+    \draw[real] (base.north) -- (imi.south west);
+    \draw[real] (logd.north) -- (imi.south);
+    \draw[real] (metd.north) -- (imi.south east);
+    \draw[wrap] (logd.east) -- node[lbl, above]{wraps} (metd.west);
+    \draw[wrap] (metd.south) |- node[lbl, pos=0.75, above]{wraps} ([yshift=-0.3cm]base.south);
+    \draw[assoc] (base.south) -- ([yshift=-0.3cm]base.south) -- node[lbl, left]{uses} (iml.north);
+    \draw[real] (sco.north) -- (iml.south);
+    \draw[assoc] (fac.north) -- node[lbl, right]{builds chain} (logd.south);
+    \draw[assoc] (svc.north) -- node[lbl, right]{asks} (fac.south);
+\end{tikzpicture}}
+\caption{UML class diagram of the inference core (Strategy + Factory + Decorator). The factory returns
+\fp{Logging(Metrics(Base(ScoliosisStrategy)))}; every object honours the same
+\texttt{IModelInferencer} contract, so the service cannot tell a decorated inferencer from a plain one.}
+\label{fig:classdiagram}
+\end{figure}
+
+\subsection{Preprocessing Pipeline}
+\label{sec:pipeline}
+
+The four stages are split between two services, matching the moment in which each is needed:
+validation and anonymisation run when the image is \emph{uploaded}; quality assessment and
+normalisation run when it is \emph{classified}. Quality problems produce warnings (the specialist
+decides), whereas validation failures stop the request.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    stage/.style={rectangle, rounded corners=4pt, draw=verdeUAEM, fill=lightgreen,
+                  minimum width=2.6cm, minimum height=1.25cm, align=center, font=\scriptsize},
+    term/.style={rectangle, rounded corners=8pt, draw=gray, fill=gray!15,
+                 minimum width=1.9cm, minimum height=0.8cm, align=center, font=\scriptsize},
+    err/.style={rectangle, rounded corners=3pt, draw=red!70, fill=lightred,
+                minimum width=2.6cm, align=center, font=\tiny, inner sep=3pt},
+    warn/.style={rectangle, rounded corners=3pt, draw=oroUAEM, fill=lightyellow,
+                minimum width=2.6cm, align=center, font=\tiny, inner sep=3pt},
+    grp/.style={rectangle, rounded corners=6pt, draw=verdeUAEM!60, dashed, inner sep=8pt},
+    ]
+    \node[term] (in) {Uploaded\\bytes};
+    \node[stage, right=0.6cm of in] (s1) {\textbf{1. Validation}\\extension, size,\\decode, dimensions,\\radiograph check};
+    \node[stage, right=0.6cm of s1] (s2) {\textbf{2. Anonymization}\\mask DICOM\\PHI tags};
+    \node[term, right=0.6cm of s2] (st) {Store original\\+ metadata};
+    \node[stage, right=1.0cm of st] (s3) {\textbf{3. Quality}\\contrast,\\brightness, entropy};
+    \node[stage, right=0.6cm of s3] (s4) {\textbf{4. Normalization}\\LANCZOS 224$\times$224,\\$[0,1]$, batch dim};
+    \node[term, right=0.6cm of s4] (out) {Tensor\\(1,224,224,3)};
+
+    \node[err, below=0.7cm of s1] (e1) {\textbf{413} file too large\\\textbf{422} format / corrupt /\\size / not a radiograph};
+    \node[warn, below=0.7cm of s3] (w3) {quality warnings in the\\response (no rejection)};
+
+    \draw[arrow] (in)--(s1); \draw[arrow] (s1)--(s2); \draw[arrow] (s2)--(st);
+    \draw[dasharrow] (st)-- node[lbl, above]{classify} (s3);
+    \draw[arrow] (s3)--(s4); \draw[arrow] (s4)--(out);
+    \draw[redarrow] (s1)--(e1);
+    \draw[dasharrow] (s3)--(w3);
+
+    \begin{scope}[on background layer]
+      \node[grp, fit=(s1)(s2)(e1), label={[font=\scriptsize\bfseries\color{verdeUAEM}]above:ImageManagementService (upload)}] {};
+      \node[grp, fit=(s3)(s4)(w3), label={[font=\scriptsize\bfseries\color{verdeUAEM}]above:PreprocessingService (classification)}] {};
+    \end{scope}
+\end{tikzpicture}}
+\caption{Preprocessing pipeline. Stage~1 implements Fail-Fast: the first failing check raises a typed
+exception, the remaining stages do not run (\fp{test_pipeline_stops_at_first_failure}) and the API
+maps it to HTTP 413 or 422. The same decoder (\texttt{decode\_image}) is used at upload and at
+classification, so DICOM files can be both uploaded and classified.}
+\label{fig:pipeline}
+\end{figure}
+
+\section{SOLID and Engineering Principles}
+
+\begin{table}[H]
+\centering
+\caption{SOLID principles (Martin, 2017) with concrete evidence in the code and in the tests.}
+\label{tab:solid}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{C{0.5cm} L{2.4cm} Y L{3.6cm}}
+\rowcolor{verdeUAEM}
+\hd{P} & \hd{Principle} & \hd{Application} & \hd{Evidence} \\
+\rowcolor{lightgreen}
+\textbf{S} & Single Responsibility & \texttt{AuditService} records business events; \texttt{utils/logger.py} manages technical logs. \fp{ImageManagementService} validates and stores; \fp{PreprocessingService} prepares the tensor. & \texttt{audit\_service.py}, \texttt{logger.py} \\
+\textbf{O} & Open/Closed & A new \texttt{IPipelineStage}, \texttt{IMLStrategy} or decorator is added without modifying \texttt{AIPipeline}, \texttt{InferenceService} or the existing decorators. & \texttt{pipeline/core.py}, \texttt{strategy\_factory} \\
+\rowcolor{lightgreen}
+\textbf{L} & Liskov Substitution & Any \texttt{IModelInferencer} (base, decorated or a test mock) is accepted by the service and by other decorators. & \fp{test_stacked_decorators_pipeline} \\
+\textbf{I} & Interface Segregation & One repository interface per aggregate; \texttt{IStorageAdapter} exposes only \fp{store/retrieve/delete}. & \fp{domain/interfaces/contracts.py} \\
+\rowcolor{lightgreen}
+\textbf{D} & Dependency Inversion & Services receive abstractions in their constructors; only \texttt{main.py} instantiates concrete classes. & \fp{main.py::create_application} \\
+\end{tabularx}
+\end{table}
+
+\noindent Additional principles: \textbf{Separation of Concerns} (four layers), \textbf{Composition over
+Inheritance} (pipeline stages and decorators are composed, not subclassed), \textbf{Fail Fast} (invalid
+images, missing secrets in production, unapproved models) and \textbf{12-Factor configuration}
+(every deployment value comes from environment variables, \fp{config/settings.py}) (Wiggins, 2011).
+
+\section{Data Model}
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    ent/.style={rectangle split, rectangle split parts=2, draw=verdeUAEM, rounded corners=2pt,
+                rectangle split part fill={lightgreen,white}, font=\scriptsize, align=left,
+                text width=4.6cm, inner sep=3pt},
+    rel/.style={thick, color=verdeUAEM!70},
+    card/.style={font=\tiny\bfseries, color=oroUAEM!80!black},
+    ]
+    \node[ent] (users) at (0,0) {\textbf{users}
+        \nodepart{second}\texttt{id} PK\\\texttt{username} UNIQUE\\\texttt{hashed\_password} (bcrypt)\\\texttt{full\_name}, \texttt{role}, \texttt{is\_active}\\\texttt{created\_at}};
+    \node[ent] (images) at (6.2,0) {\textbf{medical\_images}
+        \nodepart{second}\texttt{id} PK\\\texttt{filename}, \texttt{original\_path}\\\texttt{format}, \texttt{width}, \texttt{height}\\\texttt{file\_size\_bytes}, \texttt{is\_anonymized}\\\texttt{uploaded\_by} $\to$ users.id\\\texttt{metadata\_json}, \texttt{uploaded\_at}};
+    \node[ent] (preds) at (12.4,0) {\textbf{prediction\_results}
+        \nodepart{second}\texttt{id} PK\\\texttt{image\_id} $\to$ medical\_images.id\\\texttt{classification}, \texttt{confidence\_score}\\\texttt{model\_name}, \texttt{model\_version}\\\fp{processing_time_ms}, \texttt{predicted\_at}\\\texttt{status} (pending/confirmed/corrected)\\\texttt{reviewed\_by} $\to$ users.id\\\texttt{reviewer\_notes}, \texttt{reviewed\_at}\\\fp{affected_vertebrae}, \texttt{curve\_type}\\\texttt{curve\_detail}};
+    \node[ent] (audit) at (0,-5.2) {\textbf{audit\_log} (append-only)
+        \nodepart{second}\texttt{id} PK\\\texttt{action}, \texttt{timestamp} (UTC)\\\texttt{user\_id} $\to$ users.id\\\texttt{resource\_type}, \texttt{resource\_id}\\\texttt{details}, \texttt{ip\_address}};
+    \node[ent] (otc) at (6.2,-5.2) {\textbf{one\_time\_codes}
+        \nodepart{second}\texttt{id} PK\\\texttt{username}, \texttt{purpose} (2fa/reset)\\\texttt{code\_hash} (HMAC-SHA256)\\\texttt{expires\_at}, \texttt{attempts}, \texttt{sends}};
+    \node[ent] (mv) at (12.4,-5.8) {\textbf{model\_versions}
+        \nodepart{second}\texttt{id} PK\\\texttt{model\_name}, \texttt{version}\\\texttt{file\_path} (relative)\\\texttt{accuracy}, \texttt{precision\_score}\\\texttt{recall}, \texttt{f1\_score}\\\texttt{is\_approved}, \texttt{is\_active}};
+
+    \draw[rel] (users.east) -- node[card, above, pos=0.15]{1} node[card, above, pos=0.85]{0..*} (images.west);
+    \draw[rel] (images.east) -- node[card, above, pos=0.15]{1} node[card, above, pos=0.85]{0..*} (preds.west);
+    \draw[rel] (users.south) -- node[card, left, pos=0.15]{0..1} node[card, left, pos=0.85]{0..*} (audit.north);
+    \draw[rel, dashed] (users.south east) -- node[card, right, pos=0.8]{0..*} (otc.north west);
+    \draw[rel, dashed] (preds.south) -- node[card, right]{version name} (mv.north);
+\end{tikzpicture}}
+\caption{Entity--relationship diagram of the six tables created by \fp{infrastructure/database.py}.
+References between tables are logical integer columns (no database-level foreign keys), which keeps
+the append-only audit table independent of user deletion. Dashed lines are references by value
+(username, model name/version).}
+\label{fig:erd}
+\end{figure}
+
+\section{System Modeling}
+\label{sec:modeling}
+
+\subsection{AI Workflow Diagram}
+
+The workflow has two independent lanes: the \textbf{offline ML lifecycle}, executed by the ML engineer,
+and the \textbf{online clinical flow}. They meet only in the Model Registry, which is how training is
+kept outside clinical requests (Milestone~1 feedback, item 5).
+
+\begin{figure}[H]
+\centering
+\resizebox{!}{0.80\textheight}{%
+\begin{tikzpicture}[
+    node distance=0.42cm,
+    proc/.style={rectangle, rounded corners=3pt, draw=verdeUAEM, fill=lightgreen,
+                 text width=4.4cm, minimum height=0.7cm, align=center, font=\scriptsize},
+    ml/.style={proc, draw=oroUAEM!90!black, fill=lightyellow},
+    dec/.style={diamond, draw=oroUAEM, fill=white, aspect=2.6, inner sep=1pt,
+                text width=2.0cm, align=center, font=\tiny},
+    term/.style={rectangle, rounded corners=9pt, draw=verdeUAEM, fill=verdeUAEM!25,
+                 minimum width=2.6cm, minimum height=0.6cm, align=center, font=\scriptsize\bfseries},
+    err/.style={rectangle, rounded corners=3pt, draw=red!70, fill=lightred,
+                text width=2.2cm, align=center, font=\tiny, inner sep=2pt},
+    db/.style={cylinder, shape border rotate=90, aspect=0.2, draw=gray, fill=lightblue,
+               minimum height=1.0cm, text width=2.6cm, align=center, font=\scriptsize},
+    ]
+    % ---------- Offline lane ----------
+    \node[term] (ms) at (0,0) {ML Engineer (offline)};
+    \node[ml, below=of ms] (m1) {Roboflow \emph{scoliosis2} (YOLO labels)};
+    \node[ml, below=of m1] (m2) {Derive class from vertebra boxes\\(\fp{analyze_spine_curve}); skip indeterminate};
+    \node[ml, below=of m2] (m3) {\texttt{load\_split}: RGB 224$\times$224, $[0,1]$};
+    \node[ml, below=of m3] (m4) {Phase 1: train head (base frozen)\\Phase 2: fine-tune last 30 layers\\class weights + augmentation};
+    \node[ml, below=of m4] (m5) {Evaluate on test split\\(\texttt{ai/metrics.py})};
+    \node[dec, below=of m5] (gate) {Quality gate passed?};
+    \node[ml, below=0.6cm of gate] (m6) {Save \texttt{model.keras} + \texttt{metadata.json};\\register, \textbf{approve}, \textbf{activate}};
+    \node[err, right=0.5cm of gate] (rej) {Registered for the\\next iteration};
+    \node[db, below=0.55cm of m6] (reg) {Model Registry\\(\texttt{model\_versions})};
+
+    % ---------- Online lane ----------
+    \node[term] (cs) at (7.3,0) {Clinical user (online)};
+    \node[proc, below=of cs] (c1) {Login: password $\to$ 6-digit code $\to$ JWT};
+    \node[proc, below=of c1] (c2) {\texttt{POST /images/upload} (RBAC)};
+    \node[dec, below=of c2] (dv) {Validation passed?};
+    \node[err, right=0.5cm of dv] (e422) {413 / 422\\specific message};
+    \node[proc, below=0.5cm of dv] (c3) {Anonymize, store original,\\audit \texttt{image\_uploaded}};
+    \node[proc, below=of c3] (c4) {\texttt{POST /classify/\{id\}}: decode,\\quality check, normalize};
+    \node[dec, below=of c4] (dm) {Approved model loaded?};
+    \node[err, right=0.5cm of dm] (e503) {503\\service not ready};
+    \node[proc, below=0.5cm of dm] (c5) {Logging $\to$ Metrics $\to$ ScoliosisStrategy\\CNN softmax = diagnosis};
+    \node[proc, below=of c5] (c6) {Geometric curve estimate;\\\texttt{requires\_review} if $p<0.60$ or disagreement};
+    \node[proc, below=of c6] (c7) {Save prediction (\texttt{pending\_review}),\\audit \fp{classification_completed}};
+    \node[proc, below=of c7] (c8) {Radiologist confirms / corrects};
+    \node[proc, below=of c8] (c9) {Bilingual PDF report + audit};
+    \node[term, below=of c9] (end) {End};
+
+    \draw[arrow] (ms)--(m1); \draw[arrow] (m1)--(m2); \draw[arrow] (m2)--(m3);
+    \draw[arrow] (m3)--(m4); \draw[arrow] (m4)--(m5); \draw[arrow] (m5)--(gate);
+    \draw[arrow] (gate)-- node[lbl, left]{yes} (m6); \draw[redarrow] (gate)-- node[lbl, above]{no} (rej);
+    \draw[arrow] (m6)--(reg);
+    \draw[arrow] (cs)--(c1); \draw[arrow] (c1)--(c2); \draw[arrow] (c2)--(dv);
+    \draw[redarrow] (dv)-- node[lbl, above]{no} (e422);
+    \draw[arrow] (dv)-- node[lbl, left]{yes} (c3); \draw[arrow] (c3)--(c4); \draw[arrow] (c4)--(dm);
+    \draw[redarrow] (dm)-- node[lbl, above]{no} (e503);
+    \draw[arrow] (dm)-- node[lbl, left]{yes} (c5);
+    \draw[arrow] (c5)--(c6); \draw[arrow] (c6)--(c7); \draw[arrow] (c7)--(c8); \draw[arrow] (c8)--(c9); \draw[arrow] (c9)--(end);
+    \draw[dasharrow] (reg.east) -- node[lbl, above, sloped]{loads active version} (c5.west);
+\end{tikzpicture}}
+\caption{End-to-end AI workflow. Left: offline ML lifecycle (\texttt{ai/train\_model.py}); a version
+reaches production only through the quality gate. Right: online clinical flow; red boxes are Fail-Fast
+exits. The CNN output is the diagnosis; the geometric estimate never overrides it, it only raises the
+review flag.}
+\label{fig:aiworkflow}
+\end{figure}
+
+\subsection{UML Use Case Diagram}
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    uc/.style={ellipse, draw=verdeUAEM, fill=lightgreen!60, minimum width=3.9cm,
+               minimum height=0.75cm, align=center, font=\scriptsize, inner sep=1pt},
+    inc/.style={draw=gray!70!black, dashed, -{Stealth[length=4pt]}},
+    assoc/.style={draw=verdeUAEM!80, thick},
+    gen/.style={-{Triangle[open, length=7pt]}, thick, color=gray!70!black},
+    actlbl/.style={font=\scriptsize\bfseries, align=center},
+    stereo/.style={font=\tiny, color=gray!70!black, fill=white, inner sep=1pt},
+    ]
+    \newcommand{\actor}[3]{%
+      \begin{scope}[shift={(#1,#2)}, scale=0.45]
+        \draw[thick] (0,0.7) circle(0.3);
+        \draw[thick] (0,0.4)--(0,-0.6);
+        \draw[thick] (-0.5,0.0)--(0.5,0.0);
+        \draw[thick] (0,-0.6)--(-0.35,-1.1);
+        \draw[thick] (0,-0.6)--(0.35,-1.1);
+      \end{scope}
+      \node[actlbl] at (#1,#2-0.85) {#3};}
+
+    \draw[draw=verdeUAEM, thick, rounded corners=5pt, fill=verdeUAEM!3] (0.7,-12.2) rectangle (13.3,0.4);
+    \node[font=\scriptsize\bfseries\color{verdeUAEM}] at (7.0,0.1) {Scoliosis AI System};
+
+    % actors
+    \actor{-1.5}{-2.4}{Staff\\(abstract)}
+    \actor{-3.4}{-5.4}{Technician}
+    \actor{-1.5}{-7.0}{Radiologist}
+    \actor{14.6}{-8.4}{Admin}
+    \actor{14.6}{-11.2}{ML\\Engineer}
+
+    % generalisations (all four roles specialise Staff)
+    \draw[gen] (-3.4,-4.95) -- (-1.75,-3.3);
+    \draw[gen] (-1.5,-6.55) -- (-1.5,-3.65);
+    \draw[thick, gray!70!black] (14.6,-7.9) -- (14.6,1.0);
+    \draw[thick, gray!70!black] (14.85,-11.2) -- (15.4,-11.2) -- (15.4,1.0) -- (14.6,1.0);
+    \draw[gen] (14.6,1.0) -- (-1.5,1.0) -- (-1.5,-1.95);
+
+    % use cases
+    \node[uc] (u1) at (3.4,-0.8) {UC-01 Log in with 2FA};
+    \node[uc] (u2) at (3.4,-1.9) {UC-02 Recover password};
+    \node[uc] (u3) at (3.4,-3.0) {UC-03 Upload radiograph};
+    \node[uc] (u4) at (3.4,-4.1) {UC-04 Classify radiograph};
+    \node[uc] (u6) at (6.6,-5.8) {UC-06 View results history};
+    \node[uc] (u7) at (6.6,-7.0) {UC-07 Review prediction};
+    \node[uc] (u8) at (6.6,-8.2) {UC-08 Generate PDF report};
+    \node[uc] (u5) at (10.9,-1.6) {UC-05 Validate \&\\anonymize (Fail-Fast)};
+    \node[uc] (u12) at (10.9,-3.0) {UC-12 Estimate curve\\\& flag for review};
+    \node[uc] (u13) at (10.9,-4.6) {UC-13 Record audit event};
+    \node[uc] (u9) at (10.4,-9.4) {UC-09 View audit trail};
+    \node[uc] (u10) at (10.4,-10.5) {UC-10 Create staff account};
+    \node[uc, fill=lightyellow] (u11) at (10.4,-11.6) {UC-11 Train / register model (CLI)};
+
+    % associations
+    \foreach \u in {u1,u2,u3,u4} \draw[assoc] (-1.25,-2.4) -- (\u.west);
+    \foreach \u in {u6,u7,u8} \draw[assoc] (-1.25,-7.0) -- (\u.west);
+    \foreach \u in {u6,u8,u9,u10} \draw[assoc] (14.35,-8.4) -- (\u.east);
+    \foreach \u in {u9,u11} \draw[assoc] (14.35,-11.2) -- (\u.east);
+
+    % include relations
+    \draw[inc] (u3.east) -- node[stereo]{\textless\textless include\textgreater\textgreater} (u5.west);
+    \draw[inc] (u4.east) -- node[stereo]{\textless\textless include\textgreater\textgreater} (u12.west);
+    \draw[inc] (u4.south east) -- node[stereo, pos=0.55]{\textless\textless include\textgreater\textgreater} (u13.west);
+    \draw[inc] (u7.north east) -- node[stereo, pos=0.5]{\textless\textless include\textgreater\textgreater} (u13.south);
+\end{tikzpicture}}
+\caption{UML use case diagram. The four actors are the four roles of the RBAC matrix
+(Table~\ref{tab:rbac}); all four specialise the abstract \emph{Staff} actor and therefore inherit UC-01 to UC-04.
+Only the Radiologist reviews (UC-07); Radiologist and Admin read results and generate reports (UC-06, UC-08); Admin and ML Engineer read the audit trail. The AI model is
+an internal component, not an actor. UC-11 is performed with the command-line tools on the ML
+engineer's workstation, not through the clinical API.}
+\label{fig:usecase}
+\end{figure}
+
+\subsection{UML Component Diagram}
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    comp/.style={rectangle, draw=verdeUAEM, fill=lightgreen!50, text width=2.1cm, minimum height=1.0cm,
+                 align=center, font=\scriptsize\bfseries, drop shadow},
+    dep/.style={-{Stealth[length=4pt]}, dashed, color=verdeUAEM!70, thick},
+    ifl/.style={font=\tiny, color=oroUAEM!70!black, fill=white, inner sep=1pt, align=center},
+    st/.style={cylinder, shape border rotate=90, aspect=0.2, draw=gray, fill=lightblue,
+               minimum height=1.0cm, text width=2.3cm, align=center, font=\scriptsize},
+    ]
+    \node[comp] (ui)  at (2.6,0)  {Web UI};
+    \node[comp, text width=2.8cm] (api) at (7.8,0) {REST API\\\texttt{api/routes.py}};
+    \node[comp] (auth) at (0,-2.6)    {AuthService};
+    \node[comp] (img)  at (2.6,-2.6)  {Image\-Management Service};
+    \node[comp] (pre)  at (5.2,-2.6)  {Preprocessing Service};
+    \node[comp] (cli)  at (7.8,-2.6)  {Clinical\-Results Service};
+    \node[comp] (aud)  at (10.4,-2.6) {AuditService};
+    \node[comp] (inf)  at (13.0,-2.6) {Inference\-Service};
+    \node[comp] (ai)   at (13.0,-4.8) {AI core\\Factory, Decorators, Strategy};
+    \node[comp, fill=lightblue, text width=12.2cm] (infra) at (5.2,-6.9)
+        {Infrastructure\\[-1pt]\normalfont\tiny provides: IUserRepository, OneTimeCodeRepository, IImageRepository, IStorageAdapter, IResultRepository, IAuditRepository};
+    \node[comp, fill=lightblue] (reg) at (13.0,-6.9) {ModelRegistry};
+    \node[st] (db)  at (2.6,-9.0) {SQLite / PostgreSQL};
+    \node[st] (vol) at (7.8,-9.0) {\texttt{/app/data}};
+    \node[st] (mod) at (13.0,-9.0) {\texttt{/app/models}};
+
+    \draw[dep] (ui) -- node[ifl, above]{HTTP/JSON + Bearer JWT} (api);
+    \coordinate (bus) at (7.8,-1.35);
+    \draw[dep] (api) -- (bus);
+    \foreach \c in {auth,img,pre,cli,aud,inf} \draw[dep] (bus) -| (\c.north);
+
+    \draw[dep] (auth.south) -- node[ifl]{IUserRepository\\OneTimeCode\\Repository} (auth.south |- infra.north);
+    \draw[dep] (img.south) -- node[ifl]{IImageRepository\\IStorageAdapter} (img.south |- infra.north);
+    \draw[dep] (pre.south) -- node[ifl]{IAuditRepository} (pre.south |- infra.north);
+    \draw[dep] (cli.south) -- node[ifl]{IResultRepository\\IImageRepository} (cli.south |- infra.north);
+    \draw[dep] (aud.south) -- node[ifl]{IAuditRepository} (aud.south |- infra.north);
+    \draw[dep] (inf) -- node[ifl]{IModelInferencer} (ai);
+    \draw[dep] (inf.east) -- ++(0.5,0) |- node[ifl, pos=0.25]{active\\version} (reg.east);
+    \draw[dep] (reg) -- (infra);
+    \draw[dep] (reg) -- (mod);
+    \draw[dep] (db.north |- infra.south) -- (db.north);
+    \draw[dep] (vol.north |- infra.south) -- (vol.north);
+\end{tikzpicture}}
+\caption{UML component diagram. Labels on the dependencies name the required interface (\texttt{OneTimeCodeRepository} is a concrete class injected the same way) from
+\fp{domain/interfaces/contracts.py}; the Infrastructure component provides all of them. All
+components run in the same process (modular monolith).}
+\label{fig:component}
+\end{figure}
+
+\section{Technical Justification}
+\label{sec:justification}
+
+\begin{table}[H]
+\centering
+\caption{Main design decisions and their justification with Unit~1 concepts.}
+\label{tab:justification}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{L{3.3cm} Y L{2.7cm}}
+\rowcolor{verdeUAEM}
+\hd{Decision} & \hd{Justification} & \hd{Concepts} \\
+\rowcolor{lightgreen}
+Modular monolith & Lowest operational complexity for the team and workload; scales horizontally as a unit; boundaries preserved by interfaces (Table~\ref{tab:archalt}). & SoC, low coupling \\
+Abstract interfaces + composition root & Services are testable with mocks and independent of the database or model technology. & DIP, ISP \\
+\rowcolor{lightgreen}
+Pipeline for preprocessing & Order matters (validate before decoding further work); Fail-Fast saves computation. & Composition, Fail Fast \\
+Decorator only for inference & Cross-cutting observability without modifying the model; one role per pattern across artefacts. & OCP, SRP \\
+\rowcolor{lightgreen}
+Transfer learning (MobileNetV2) & Small medical dataset; ImageNet features plus fine-tuning; 3.5\,M parameters keep CPU inference fast (Sandler et al., 2018). & Reuse \\
+Quality gate + registry & Prevents a model that does not beat a trivial baseline from reaching patients. & Fail Fast, traceability \\
+\rowcolor{lightgreen}
+Human in the loop & Every prediction starts as \texttt{pending\_review}; only a radiologist can confirm or correct it. & Safety, decision support \\
+\end{tabularx}
+\end{table}
+
+% ==========================================
+% MILESTONE 2: IMPLEMENTATION
+% ==========================================
+\newpage
+\section*{MILESTONE 2: IMPLEMENTATION}
+\addcontentsline{toc}{section}{MILESTONE 2: IMPLEMENTATION}
+
+\section{Milestone 1 Corrections Summary}
+\label{sec:m1corr}
+
+Milestone~1 obtained 31.0/40 (77.5\%). The instructor's observations and the corrections now reflected
+in the code are:
+
+\begin{table}[H]
+\centering
+\caption{Milestone 1 feedback and correction made.}
+\label{tab:m1corr}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{C{0.4cm} L{4.4cm} Y}
+\rowcolor{verdeUAEM}
+\hd{\#} & \hd{Milestone 1 feedback} & \hd{Correction / improvement made} \\
+\rowcolor{lightgreen}
+1 & Over-engineering (microservices, EDA, broker, gateway, HL7/FHIR\ldots) & Modular monolith (Table~\ref{tab:archalt}). No broker or external gateway. PACS/HL7 moved to the \emph{Planned} tier. \\
+2 & Categorical claims against the monolith & Comparative, measured justification (Sections~\ref{sec:arch} and~\ref{sec:c6}). \\
+\rowcolor{lightgreen}
+3 & Observer (GoF) confused with a message broker & No Observer is claimed. Auditing is a synchronous call to \texttt{IAuditRepository} (Repository pattern). \\
+4 & Decorator changed role (inference vs.\ preprocessing) & Decorator wraps only \texttt{IModelInferencer}; preprocessing is a Pipeline of stages (Table~\ref{tab:patterns}). \\
+\rowcolor{lightgreen}
+5 & Transfer learning: where, who and how it reaches the registry & Offline \texttt{ai/train\_model.py} by the ML engineer; quality gate; \texttt{ModelRegistry} approve/activate (Figure~\ref{fig:aiworkflow}). \\
+6 & Actors inconsistent (ML engineer missing, AI model as actor) & Four roles = four actors = four stakeholders; the model is an internal component (Figure~\ref{fig:usecase}). \\
+\rowcolor{lightgreen}
+7 & Components named inconsistently & Six canonical services with the exact class and file names (Table~\ref{tab:services}). \\
+\end{tabularx}
+\end{table}
+
+\section{Technology Stack and Project Structure}
+
+\subsection{Technology Stack}
+
+\begin{table}[H]
+\centering
+\caption{Technology stack. \texttt{requirements.txt} declares lower bounds; the second column lists the versions installed in the verified Docker image (Section~\ref{sec:c5}).}
+\label{tab:stack}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{L{2.7cm} L{4.2cm} Y}
+\rowcolor{verdeUAEM}
+\hd{Layer} & \hd{Technology (installed)} & \hd{Justification} \\
+\rowcolor{lightgreen}
+Web framework & FastAPI 0.165, Uvicorn 0.54 & OpenAPI generation, Pydantic validation, dependency injection. \\
+AI / ML & TensorFlow 2.21 / Keras 3.15, NumPy 2.1, Pillow 13 & MobileNetV2 pre-trained on ImageNet (Abadi et al., 2016); CPU execution because pods have no GPU. \\
+\rowcolor{lightgreen}
+Evaluation & scikit-learn 1.9 (matplotlib in \texttt{requirements-dev.txt}) & Standard metrics and plots (training and evaluation only). \\
+Persistence & SQLAlchemy 2.1, psycopg2 2.9, SQLite (dev), PostgreSQL 16 (Compose/K8s) & Repository-friendly ORM; PostgreSQL when several replicas share data. \\
+\rowcolor{lightgreen}
+Security & python-jose 3.5, passlib 1.7 + bcrypt 4.3 (pinned $<5$), \texttt{secrets} & JWT HS256; bcrypt hashing; CSPRNG one-time codes stored as HMAC-SHA256. \\
+Medical imaging & pydicom 3.0 & DICOM decoding and removal of identifying tags. \\
+\rowcolor{lightgreen}
+Reports & fpdf2 2.9 & Programmatic bilingual PDF. \\
+Logging & loguru 0.8 & Rotating application, error and audit logs. \\
+\rowcolor{lightgreen}
+Testing / quality & pytest, pytest-cov, httpx, psutil, flake8 7.1, bandit 1.7 (\texttt{requirements-dev.txt}) & Unit to E2E tests, coverage gate, memory profiling, lint and SAST. \\
+Delivery & Docker, Docker Compose, Kubernetes (kustomize), GitHub Actions & Reproducible image; orchestration and autoscaling; automated pipeline. \\
+\end{tabularx}
+\end{table}
+
+\subsection{Project Directory Structure}
+
+\begin{lstlisting}[language={}, numbers=none, caption={Repository layout (version 3.3.0).}]
+ScoliosisAI/
+|-- .github/workflows/ci-cd.yml      # CI/CD pipeline (5 jobs)
+|-- main.py                          # FastAPI app + composition root (DI)
+|-- config/settings.py               # 12-factor configuration (environment variables)
+|-- domain/interfaces/contracts.py   # entities + abstract interfaces (ABC)
+|-- api/routes.py, error_handlers.py # endpoints + RBAC; exception -> HTTP mapping
+|-- services/                        # 6 services + model_factory, inference_strategy,
+|                                    #   inference_decorators
+|-- pipeline/core.py, stages.py      # AIPipeline + 4 stages, decode_image()
+|-- infrastructure/                  # database, repositories, storage, model_registry
+|-- ai/                              # transfer_learning, train_model, evaluate_model,
+|                                    #   metrics, model_probe, plot_confusion_matrix
+|-- utils/                           # exceptions (hierarchy), logger (loguru)
+|-- frontend/index.html              # single-page web UI (EN/ES, light/dark)
+|-- models/scoliosis_classifier_v1.0.0|v1.1.0/   # model.keras, metadata.json,
+|                                    #   evaluation_results.json, probe_results.json
+|-- tests/unit|integration|profiling|system/     # 189 tests
+|-- k8s/                             # 10 manifests + kustomization.yaml
+|-- scripts/                         # replica_test.sh, load_test.py, process_scaling.py,
+|                                    #   rbac_demo.py, generate_test_samples.py
+|-- evidence/                        # outputs of the runs cited in this document
+|-- docs/latex/                      # source of this document
+|-- Dockerfile, .dockerignore, docker-compose.yml, .env.example
+`-- requirements.txt | requirements-dev.txt
+\end{lstlisting}
+
+\section{Data Pipeline Implementation}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Input.} \texttt{POST /images/upload} reads at most 15\,MB\,+\,1 byte, so oversized bodies
+          are rejected (413) without loading them completely. The client filename is sanitised
+          (\texttt{sanitize\_filename}) before it is used in a storage path.
+    \item \textbf{Validation} (\texttt{ValidationStage}): extension whitelist; size; decoding with Pillow or
+          pydicom (16-bit and \texttt{MONOCHROME1} handled); 32--8192\,px; rejection of colour photographs,
+          white-background graphics and outdoor scenes.
+    \item \textbf{Anonymisation} (\fp{AnonymizationStage}, \fp{anonymize_dicom_bytes}): the identifying DICOM tags
+          (\texttt{PatientName}, \texttt{PatientID}, \texttt{PatientBirthDate}, institution, physicians, study
+          dates, private tags, \ldots) are erased from the file \emph{before it is written to disk} and masked in
+          the metadata that is persisted; if a file cannot be scrubbed it is rejected (fail closed). Pixel data is
+          not modified.
+    \item \textbf{Transformation} (\texttt{QualityCheckStage}, \fp{NormalizationStage}): contrast,
+          brightness and entropy report; LANCZOS resize to 224$\times$224; float32 in $[0,1]$; batch dimension.
+    \item \textbf{Preparation for training} (\fp{TransferLearningTrainer}): YOLO label files are mapped to
+          the three classes; images and labels are kept aligned with their file names; \texttt{tf.data}
+          batching and prefetching.
+\end{itemize}
+
+\section{AI Module: MobileNetV2 Transfer Learning}
+
+\subsection{Dataset and Label Derivation}
+
+The Roboflow \emph{scoliosis2} dataset (Roboflow, n.d.) provides AP radiographs annotated in YOLO
+format: one bounding box per vertebra (class 0) and, for some images, a ``normal spine'' box (class 2).
+The three clinical classes are derived from the geometry of the vertebra boxes
+(\fp{analyze_spine_curve}): deviation from the plumb line below 0.042 (normalised units) or the
+normal-spine token $\to$ NO ESCOLIOSIS; one dominant lateral arc $\to$ C-curve; two opposite arcs $\to$
+S-curve. Images with fewer than four annotated vertebrae are \emph{indeterminate} and are excluded. The
+held-out \textbf{test split has 101 images} (33 normal, 45 C, 23 S). The training run of v1.1.0 used 1\,535 training and 100 validation images
+(the Roboflow export contains augmented copies of the source radiographs); the counts and the class weights
+of each run are written to \texttt{metadata.json}. \emph{Scope of the labels:} they are derived from expert annotations by the rule above, so the reported
+metrics measure agreement with those reference labels, not agreement with a clinical Cobb-angle measurement.
+
+\subsection{Model and Training Configuration}
+
+\begin{table}[H]
+\centering
+\caption{Model configuration implemented in \fp{ai/transfer_learning.py}.}
+\label{tab:modelcfg}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{L{3.6cm} L{4.6cm} Y}
+\rowcolor{verdeUAEM}
+\hd{Parameter} & \hd{Value} & \hd{Reason} \\
+\rowcolor{lightgreen}
+Base network & MobileNetV2, ImageNet weights & Few parameters, fast on CPU (Sandler et al., 2018). \\
+\rowcolor{lightgreen}
+Input contract & RGB 224$\times$224, float32 in $[0,1]$ & Same tensor produced by \fp{NormalizationStage}; enforced at run time by \fp{ScoliosisStrategy.validate_input}. \\
+In-model scaling & \texttt{Rescaling(2, offset=-1)} & MobileNetV2 expects $[-1,1]$. \\
+\rowcolor{lightgreen}
+Augmentation & rotation 2\%, zoom 8\%, contrast 15\% & Active only during training. \\
+Head & GAP $\parallel$ (Conv2D 1$\times$1, 48 filters $\to$ Flatten of the 7$\times$7 map) $\to$ BatchNorm $\to$ Dropout 0.3 $\to$ Dense 192 ReLU $\to$ Dropout 0.2 $\to$ Dense 3 softmax & The spatial branch keeps the cranial--caudal trajectory of the spine that global pooling discards. \\
+\rowcolor{lightgreen}
+Fine-tuning & last 30 layers of the backbone trainable (BatchNorm frozen), Adam $3\cdot10^{-4}$, $\leq$12 epochs & Domain adaptation without destroying the pre-trained features; one training phase. \\
+Imbalance & class weights $n/(K\,n_k)$ = 2.21 / 0.59 / 1.17 & 44.6\% of the test split is C-curve (He \& Garcia, 2009). \\
+\rowcolor{lightgreen}
+Callbacks & EarlyStopping on \texttt{val\_loss} (patience 4, best weights), ReduceLROnPlateau & Avoid over-fitting; the test split is never used for model selection. \\
+Quality gate & macro-F1 $\geq$ 0.70, every class recall $\geq$ 0.60, beat majority baseline & \fp{passes_quality_gate}. \\
+\end{tabularx}
+\end{table}
+
+\begin{lstlisting}[language=Python, caption={Model construction (excerpt of \texttt{TransferLearningTrainer.build\_model}).}]
+inputs = tf.keras.Input(shape=self._input_shape)                       # [0, 1]
+x = aug(inputs)                                                        # active only in training
+x = tf.keras.layers.Rescaling(2.0, offset=-1.0)(x)                     # -> [-1, 1] (MobileNetV2)
+feat_map = self._base_model(x, training=False)                         # (None, 7, 7, 1280)
+gap = tf.keras.layers.GlobalAveragePooling2D()(feat_map)               # branch A: global features
+spatial = tf.keras.layers.Conv2D(48, 1, activation="relu")(feat_map)   # branch B: spatial map
+merged = tf.keras.layers.Concatenate()([gap, tf.keras.layers.Flatten()(spatial)])
+head = tf.keras.layers.BatchNormalization()(merged)
+head = tf.keras.layers.Dropout(0.3)(head)
+head = tf.keras.layers.Dense(192, activation="relu")(head)
+head = tf.keras.layers.Dropout(0.2)(head)
+outputs = tf.keras.layers.Dense(NUM_CLASSES, activation="softmax")(head)
+\end{lstlisting}
+
+\subsection{Inference Logic: CNN Diagnosis plus Geometric Review Flag}
+
+\begin{enumerate}[leftmargin=*, label=\textbf{Step \arabic*:}]
+    \item The compiled forward pass returns $\mathbf{p}=[p_\text{normal},p_\text{C},p_\text{S}]$. The
+          \textbf{diagnosis} is $\arg\max\mathbf{p}$ and the confidence is $\max\mathbf{p}$; the probabilities
+          returned to the user are exactly the softmax output.
+    \item \fp{estimate_vertebrae_from_image} tracks the intensity centroid of 17 horizontal bands
+          (T1--L5) and reports apex and affected levels. It is labelled ``Geometric estimate'' and
+          \textbf{never changes the diagnosis}.
+    \item $\texttt{requires\_review} = (\max\mathbf{p} < 0.60) \lor (\text{geometry disagrees with the CNN})$. If the
+          loaded model is not approved, every prediction is also flagged.
+\end{enumerate}
+
+\noindent The filename of the uploaded image has no influence on the result
+(\fp{test_filename_cannot_change_the_diagnosis}); an earlier version did use it, see
+Section~\ref{sec:c1}.
+
+\begin{lstlisting}[language=Python, caption={Core of \texttt{ScoliosisStrategy.classify}.}]
+tensor = self.validate_input(np.expand_dims(preprocessed_image, 0))   # shape, NaN/Inf, range [0, 1]
+probabilities = self._forward(tensor).numpy()[0]                       # compiled tf.function
+predicted_class = int(np.argmax(probabilities))
+confidence_score = float(probabilities[predicted_class])
+geometry = estimate_vertebrae_from_image(geometry_source)
+geometry_agrees = geometry["curve_type"] != "Indeterminate" and geometry_class == predicted_class
+low_confidence = confidence_score < CONFIDENCE_THRESHOLD          # 0.60
+requires_review = low_confidence or not geometry_agrees
+\end{lstlisting}
+
+\section{Inference Engine and Application Workflow}
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    life/.style={rectangle, draw=verdeUAEM, fill=lightgreen, minimum width=2.25cm,
+                 minimum height=0.75cm, align=center, font=\scriptsize\bfseries},
+    msg/.style={-{Stealth[length=4pt]}, thick, color=verdeUAEM!80!black},
+    ret/.style={-{Stealth[length=4pt]}, dashed, color=gray!70!black},
+    mlbl/.style={font=\tiny, fill=white, inner sep=1pt},
+    ]
+    \foreach \x/\n/\t in {0/c/Client, 2.6/a/API (routes), 5.2/i/ImageMgmt, 7.8/p/Preprocessing, 10.4/f/Inference\\Service, 13.0/s/Decorators +\\Strategy, 15.6/r/ClinicalResults}{
+        \node[life] (\n) at (\x,0) {\t};
+        \draw[dashed, gray] (\x,-0.4) -- (\x,-10.2);
+    }
+    \draw[msg] (0,-1.0) -- node[mlbl, above]{POST /classify/\{id\} + JWT} (2.6,-1.0);
+    \node[mlbl, right, draw=oroUAEM, fill=lightyellow] at (2.7,-1.6) {verify JWT + RBAC (\texttt{\_authenticate\_and\_authorize})};
+    \draw[msg] (2.6,-2.3) -- node[mlbl, above]{get\_image + load\_image\_array} (5.2,-2.3);
+    \draw[ret] (5.2,-2.8) -- node[mlbl, above]{RGB array (decode\_image)} (2.6,-2.8);
+    \draw[msg] (2.6,-3.5) -- node[mlbl, above, pos=0.7]{preprocess()} (7.8,-3.5);
+    \draw[ret] (7.8,-4.0) -- node[mlbl, above, pos=0.3]{tensor + quality report} (2.6,-4.0);
+    \draw[msg] (2.6,-4.7) -- node[mlbl, above, pos=0.75]{classify()} (10.4,-4.7);
+    \draw[msg] (10.4,-5.3) -- node[mlbl, above]{predict()} (13.0,-5.3);
+    \node[mlbl, right, align=left] at (13.1,-6.0) {log $\to$ time $\to$\\tf.function $\to$\\geometry};
+    \draw[ret] (13.0,-6.8) -- node[mlbl, above]{softmax + flags} (10.4,-6.8);
+    \node[mlbl, left] at (10.3,-7.3) {audit classification\_completed};
+    \draw[ret] (10.4,-7.8) -- node[mlbl, above, pos=0.25]{result} (2.6,-7.8);
+    \draw[msg] (2.6,-8.5) -- node[mlbl, above, pos=0.85]{save\_prediction (pending\_review)} (15.6,-8.5);
+    \draw[ret] (15.6,-9.0) -- node[mlbl, above, pos=0.85]{prediction\_id} (2.6,-9.0);
+    \draw[ret] (2.6,-9.7) -- node[mlbl, above]{200 JSON} (0,-9.7);
+\end{tikzpicture}}
+\caption{UML sequence diagram of \texttt{POST /api/v1/classify/\{id\}} as implemented in
+\fp{api/routes.py::classify_image}. Domain errors raised at any step are converted to HTTP status codes
+by the exception handlers (Table~\ref{tab:errors}).}
+\label{fig:sequence}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{REST API (generated from \texttt{/openapi.json}) and roles allowed by \texttt{api/routes.py}.}
+\label{tab:endpoints}
+\renewcommand{\arraystretch}{1.15}
+\footnotesize
+\begin{tabularx}{\textwidth}{L{1.5cm} L{5.4cm} Y}
+\rowcolor{verdeUAEM}
+\hd{Method} & \hd{Path (prefix /api/v1)} & \hd{Purpose and access} \\
+\rowcolor{lightgreen}
+POST & /auth/register & Create account; anonymous only as technician, privileged roles by admin \\
+POST & /auth/login, /auth/verify-2fa, /auth/resend-2fa & Two-step login; JWT returned only by \texttt{verify-2fa} \\
+\rowcolor{lightgreen}
+POST & /auth/forgot-password, /auth/reset-password & Recovery code (same answer whether the user exists or not) \\
+GET & /auth/me, /model/info & Any authenticated user \\
+\rowcolor{lightgreen}
+POST/GET & /images/upload, /images, /images/\{id\} & All four roles (token required) \\
+POST & /classify/\{id\} & All four roles (token required) \\
+\rowcolor{lightgreen}
+GET & /results, /results/\{id\} & Radiologist, admin \\
+POST & /results/\{id\}/review & Radiologist only \\
+\rowcolor{lightgreen}
+POST & /results/\{id\}/report & Radiologist, admin \\
+\rowcolor{lightgreen}
+GET & /reports/\{filename\} & Radiologist, admin (path-traversal safe) \\
+GET & /audit & Admin, ML engineer \\
+\rowcolor{lightgreen}
+GET & /health (also \texttt{/health}, \texttt{/ready} at root) & Public probes (liveness / readiness) \\
+\end{tabularx}
+\end{table}
+
+\section{Authentication and Security}
+\label{sec:auth}
+
+\begin{table}[H]
+\centering
+\caption{Role-based access control matrix (single source: \texttt{api/routes.py}; the web UI shows the same menus).}
+\label{tab:rbac}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{Y C{1.9cm} C{1.9cm} C{1.4cm} C{1.9cm}}
+\rowcolor{verdeUAEM}
+\hd{Operation} & \hd{Technician} & \hd{Radiologist} & \hd{Admin} & \hd{ML Engineer} \\
+\rowcolor{lightgreen}
+Upload and classify radiographs & \yes & \yes & \yes & \yes \\
+List / view images, model info & \yes & \yes & \yes & \yes \\
+\rowcolor{lightgreen}
+View results history & \no & \yes & \yes & \no \\
+Confirm / correct a prediction & \no & \yes & \no & \no \\
+\rowcolor{lightgreen}
+Generate / download PDF report & \no & \yes & \yes & \no \\
+View audit trail & \no & \no & \yes & \yes \\
+\rowcolor{lightgreen}
+Create privileged accounts & \no & \no & \yes & \no \\
+Train / evaluate / register models & \multicolumn{4}{c}{offline CLI on the ML engineer's workstation (not exposed by the API)} \\
+\end{tabularx}
+\end{table}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{2FA:} \texttt{/auth/login} only validates the password and sends a 6-digit code generated
+          with \texttt{secrets}; the code is stored as HMAC-SHA256, expires in 5 minutes, allows 5 attempts
+          and 3 resends. Codes live in the \texttt{one\_time\_codes} table, so every worker or replica can
+          verify them. The SMS gateway is simulated: the code is written to the server log
+          (\texttt{OTP\_LOG\_CODES}).
+    \item \textbf{Secrets:} \texttt{SECRET\_KEY} comes from the environment and has no public default; with
+          \fp{ENVIRONMENT=production} the application refuses to start if it is missing, is the development value or has
+          fewer than 32 characters. In production no demo accounts are created (only an administrator whose password comes from
+          \texttt{INITIAL\_ADMIN\_PASSWORD}) and one-time codes are never written to the logs.
+    \item \textbf{Other controls:} CORS limited to configured origins (none in production: the portal is served by the API itself),
+          security headers and \texttt{Cache-Control: no-store} on \texttt{/api/*}, sanitised filenames, report downloads resolved
+          inside the reports directory, no internal paths or stack traces returned to clients, account-recovery answers that do not reveal
+          whether a user exists, ingress rate limit against password guessing.
+\end{itemize}
+
+\noindent\textbf{Authorisation is enforced on the server.} Hiding a button is not a control: any client with a valid token can call the API directly. A technician
+(or an administrator) who calls \texttt{POST /results/\{id\}/review} with a valid session receives \texttt{403}, the record stays \texttt{pending\_review} and nothing
+is written (\fp{test_only_the_radiologist_can_confirm_a_diagnosis}); without a token the answer is \texttt{401} --- on \emph{every} endpoint
+(\fp{test_no_authentication_header_is_401_everywhere}). The reviewer recorded is always the owner of the signed token.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{terminal_rbac.png}
+\caption{Real API calls (\fp{evidence/rbac_api_demo.txt}): technician and admin sessions are refused with 403, no token with 401, only the radiologist succeeds.}
+\label{fig:rbac}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.49\textwidth}\centering
+\includegraphics[width=\linewidth]{ui_login.png}\\[-1pt]{\footnotesize (a) Login}
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}\centering
+\includegraphics[width=\linewidth]{ui_2fa.png}\\[-1pt]{\footnotesize (b) 2FA code (sent by the simulated SMS gateway)}
+\end{minipage}
+\caption{Two-step login in the web UI. The JWT is stored by the browser only after step (b) succeeds.}
+\label{fig:uilogin}
+\end{figure}
+
+\section{Error Handling, Logging and Robustness}
+
+\begin{table}[H]
+\centering
+\caption{Exception hierarchy (\fp{utils/exceptions.py}) and HTTP mapping (\fp{api/error_handlers.py}, \fp{register_exception_handlers}).}
+\label{tab:errors}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{L{5.2cm} C{1.2cm} Y}
+\rowcolor{verdeUAEM}
+\hd{Exception} & \hd{HTTP} & \hd{Typical user message} \\
+\rowcolor{lightgreen}
+\fp{AuthenticationError}, \texttt{OneTimeCodeError} & 401 & ``Invalid verification code (4 attempts left).'' \\
+\fp{AuthorizationError} & 403 & ``Role 'technician' is not authorized to perform this action (allowed roles: radiologist)'' \\
+\rowcolor{lightgreen}
+\fp{ModelNotFoundError}, unknown identifiers & 404 & ``Image '987654' not found'' \\
+\fp{FileSizeExceededError} & 413 & ``File size (16.2 MB) exceeds the maximum allowed size (15 MB)'' \\
+\rowcolor{lightgreen}
+\fp{UnsupportedFormatError}, \fp{CorruptedImageError}, \texttt{ImageQualityError} & 422 & ``Image too small (16x16). Minimum: 32x32'' \\
+\fp{ModelNotLoadedError} & 503 & ``No trained model is loaded \ldots'' \\
+\texttt{InvalidModelInputError} & 422 & ``values must be in [0, 1] (was the image divided by 255?)'' \\
+\rowcolor{lightgreen}
+\texttt{InferenceError}, \texttt{PipelineStageError}, \texttt{RepositoryError}, \texttt{StorageError}, unexpected & 500 & Generic message (``See the server log''); full trace only in \texttt{errors.log} \\
+\end{tabularx}
+\end{table}
+
+\noindent \textbf{Logging} (\texttt{utils/logger.py}, loguru): console; \texttt{application.log} (daily
+rotation, 30 days); \texttt{errors.log} (90 days); \texttt{audit.log} (records bound with
+\texttt{audit=True}, 365 days). The business audit trail is the \texttt{audit\_log} table written by
+\texttt{AuditRepository}. If the log volume is read-only the application keeps running with console
+logging. \textbf{Robustness}: database sessions always roll back and close
+(\texttt{session\_scope}); SQLite runs in WAL mode with a busy timeout; PostgreSQL connections use
+\texttt{pool\_pre\_ping}; the readiness probe keeps a pod without an approved model out of the Service.
+
+\section{Code Efficiency}
+
+\begin{table}[H]
+\centering
+\caption{Efficiency techniques and their measured effect (Section~\ref{sec:c6}).}
+\label{tab:efficiency}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{L{4.3cm} Y}
+\rowcolor{verdeUAEM}
+\hd{Technique} & \hd{Where / effect} \\
+\rowcolor{lightgreen}
+Compiled forward pass (\texttt{tf.function}) & \fp{ScoliosisStrategy.load_model}: 71.7\,ms (\texttt{model.predict}) $\to$ 18.6\,ms per image (Table~\ref{tab:forward}). \\
+Model instance cache & \texttt{ModelFactory}: one loaded model per version and process. \\
+\rowcolor{lightgreen}
+Memory-aware validation (\texttt{int16}/\texttt{float32}) & \texttt{ValidationStage}: peak about 60\,MB (int64/float64 reference) $\to$ 27\,MB (including decoding) for 1024$\times$1024. \\
+Bounded metrics history & \fp{deque(maxlen=1000)} instead of an unbounded list (leak). \\
+\rowcolor{lightgreen}
+Thread-pool endpoints & Blocking work in \texttt{def} endpoints keeps the event loop (and probes) responsive. \\
+\texttt{tf.data} prefetch, O(1) image index & Training input pipeline (\texttt{prepare\_dataset}, \texttt{load\_split}). \\
+\rowcolor{lightgreen}
+Bounded upload read & At most 15\,MB\,+\,1 byte read before rejecting. \\
+\end{tabularx}
+\end{table}
+
+\section{Version Control and Collaborative Development}
+
+\begin{itemize}[leftmargin=*]
+    \item Git repository with a root \texttt{.gitignore} (runtime data, databases, generated reports, \texttt{.env} and
+          \texttt{k8s/secret.yaml} excluded; model artefacts versioned) and a \texttt{.dockerignore}. The database, the generated
+          reports and the real Kubernetes Secret that had been committed were removed from version control in 3.3.0.
+    \item Branches \texttt{develop} and \texttt{main}; pull requests to \texttt{main} must pass the
+          pipeline (lint, tests with coverage gate, image build); images pushed from \texttt{main} are
+          tagged with the commit SHA, linking every deployment to a commit.
+    \item \texttt{CHANGELOG.md} records the changes of each milestone (1.0.0, 2.0.0, 3.0.0, 3.1.0, 3.2.0, 3.3.0); the
+          individual contributions of the team are those recorded in the Git history.
+\end{itemize}
+
+% ==========================================
+% MILESTONE 3: VALIDATION AND DEPLOYMENT
+% ==========================================
+\newpage
+\section*{MILESTONE 3: TESTING, VALIDATION AND DEPLOYMENT}
+\addcontentsline{toc}{section}{MILESTONE 3: TESTING, VALIDATION AND DEPLOYMENT}
+
+\section{Criterion 1: Corrections and Improvements from Milestone 2}
+\label{sec:c1}
+
+Milestone~2 obtained 29.8/40. The table maps each observation to the correction and its evidence.
+Row~7 reports problems found in an internal technical review of the Milestone~2/3 code; they are
+included because they changed results reported earlier.
+
+\begin{longtable}{C{0.3cm} L{3.0cm} p{7.0cm} L{3.2cm}}
+\caption{Milestone 2 $\to$ Milestone 3 correction matrix.}\label{tab:corrections}\\
+\rowcolor{verdeUAEM}
+\hd{\#} & \hd{Observation} & \hd{Correction applied} & \hd{Evidence} \\
+\endfirsthead
+\rowcolor{verdeUAEM}
+\hd{\#} & \hd{Observation} & \hd{Correction applied} & \hd{Evidence} \\
+\endhead
+\rowcolor{lightgreen}
+1 & Missing traceability matrix & This table plus the rubric traceability tables (Tables~\ref{tab:m2rubric} and~\ref{tab:rubric}). & This document \\
+2 & Performance not verified & \fp{benchmark_performance.py}: per-stage latency, throughput, concurrency, forward-pass comparison and RAM, written to JSON. & \fp{evidence/benchmark.json} \\
+\rowcolor{lightgreen}
+3 & Model loading unclear (fine-tuned vs.\ fallback) & No fallback: the service loads only an \emph{approved} registry version (bootstrapped from the packaged artefact); otherwise \texttt{/ready} returns 503 and classification returns 503. & \fp{inference_service.py}, \texttt{model\_registry.py} \\
+4 & Workflow not integrated & Black-box E2E test through HTTP with three actors, plus 72 integration tests. & \texttt{tests/system/}, \fp{tests/integration/} \\
+\rowcolor{lightgreen}
+5 & Technical vs.\ audit logging & Audit events in the \texttt{audit\_log} table (+ filtered \texttt{audit.log}); technical logs in \texttt{application.log}/\texttt{errors.log}. & \texttt{audit\_service.py}, \texttt{logger.py} \\
+6 & Unverified claims & Feature tiers (Table~\ref{tab:tiers}); every number in this document has a script or test behind it. & Table~\ref{tab:tiers} \\
+\rowcolor{lightgreen}
+7 & Hardening after the Milestone~2 code review & (a) Inference now depends only on the image pixels (no file-name or annotation look-ups) and reports the real softmax; (b) the evaluation script measures exactly the deployed CNN path, avoiding data leakage (Kaufman et al., 2012); (c) production-ready Dockerfile and health probes; (d) JWT issued only after 2FA and RBAC on every endpoint (completed in Milestone~4, Section~\ref{sec:m4c1}). & \fp{CHANGELOG.md}, regression tests \\
+\end{longtable}
+
+\section{Criterion 2: Software Testing Strategy}
+\label{sec:c2}
+
+\subsection{Strategy and Isolation}
+
+All tests run in an isolated environment created by \texttt{tests/conftest.py} \emph{before} any project
+module is imported: a temporary directory for data, uploads, reports and logs, a dedicated SQLite database (or an empty
+PostgreSQL database through \texttt{TEST\_DATABASE\_URL}), and the \emph{real packaged model} (\texttt{models/scoliosis\_classifier\_v1.1.0}),
+so the complete Factory $\to$ Decorators $\to$ Strategy $\to$ TensorFlow path is exercised. The suite never touches the project's own
+database or storage (an earlier version wrote into them) and uses the standard FastAPI \texttt{TestClient}. Fixtures create their own data.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.8]
+    \fill[verdeUAEM!12, draw=verdeUAEM, thick] (-7.5,0)--(7.5,0)--(5.5,1.2)--(-5.5,1.2)--cycle;
+    \fill[verdeUAEM!24, draw=verdeUAEM, thick] (-5.5,1.2)--(5.5,1.2)--(3.5,2.4)--(-3.5,2.4)--cycle;
+    \fill[verdeUAEM!40, draw=verdeUAEM, thick] (-3.5,2.4)--(3.5,2.4)--(1.5,3.6)--(-1.5,3.6)--cycle;
+    \fill[oroUAEM!45, draw=oroUAEM, thick] (-1.5,3.6)--(1.5,3.6)--(0,4.6)--cycle;
+    \node[font=\small\bfseries, color=verdeUAEM!80!black] at (0,0.6) {112 unit tests --- services, pipeline, AI, registry, numerics};
+    \node[font=\small\bfseries, color=verdeUAEM!80!black] at (0,1.8) {72 integration --- API, security, robustness};
+    \node[font=\footnotesize\bfseries, color=verdeUAEM!80!black] at (0,3.0) {4 memory profiling};
+    \node[font=\scriptsize\bfseries, color=oroUAEM!70!black] at (0,3.95) {1 E2E};
+    \node[draw=verdeUAEM, fill=verdeUAEM!8, rounded corners=4pt, font=\small\bfseries, inner sep=7pt]
+        at (0,-0.8) {189 tests \quad|\quad 189 passed \quad|\quad coverage 79\% (gate 75\%)};
+\end{tikzpicture}
+\caption{Test pyramid of the suite (Cohn, 2009): many fast unit tests, fewer integration tests, one black-box E2E scenario.}
+\label{fig:pyramid}
+\end{figure}
+
+\subsection{Test Suite Summary}
+
+\begin{longtable}{L{4.6cm} C{1.4cm} C{0.5cm} p{7.0cm}}
+\caption{Test files and what each validates (counts from the executed run).}\label{tab:tests}\\
+\rowcolor{verdeUAEM}
+\hd{File} & \hd{Type} & \hd{\#} & \hd{What it validates} \\
+\endfirsthead
+\rowcolor{verdeUAEM}
+\hd{File} & \hd{Type} & \hd{\#} & \hd{What it validates} \\
+\endhead
+\rowcolor{lightgreen}
+\fp{test_auth_service.py} & Unit & 15 & bcrypt; token only after 2FA; single-use codes; lockout after 5 attempts; expiry; resend limit; tampered, forged and expired JWT; RBAC check. \\
+\fp{test_preprocessing_pipeline.py} & Unit & 16 & Fail-Fast (size, corruption, extension, colour photo, document); DICOM 16-bit decoding; \emph{identifiers erased from the stored DICOM}; filename sanitisation; stop at first failure. \\
+\rowcolor{lightgreen}
+\fp{test_validation_numerics.py} & Unit & 28 & \emph{int16/float32 validation takes the same accept/reject decision as an int64/float64 reference on 25 images; no overflow on extreme channel differences; peak memory.} \\
+\fp{test_clinical_results_service.py} & Unit & 11 & Mexico City time; confirm/correct review; PDF in ES and EN; unknown result. \\
+\rowcolor{lightgreen}
+\fp{test_ai_pipeline.py} & Unit & 8 & Label derivation (normal/C/S/indeterminate); class weights; \texttt{Rescaling} maps $[0,1]\to[-1,1]$; evaluation script. \\
+\fp{test_inference_strategy.py} & Unit & 8 & Probabilities = real softmax; filename cannot change the diagnosis; review flags; 503 without approved model; swapping the strategy; non-collapse probe. \\
+\rowcolor{lightgreen}
+\fp{test_model_input_contract.py} & Unit & 7 & \emph{$[0,255]$, wrong shape, NaN and Inf are rejected; the packaged v1.1.0 reacts to its input; a constant model is flagged by the probe.} \\
+\fp{test_model_acceptance.py} & Unit & 5 & \emph{An ``approved'' model that ignores its input is not served; unapproved model not served; v1.0.0 registered as rejected; stored evaluation consistent with its confusion matrix.} \\
+\rowcolor{lightgreen}
+\fp{test_inference_decorators.py} & Unit & 5 & Logging and metrics decorators, stacking, bounded history, error propagation. \\
+\fp{test_model_registry.py} & Unit & 5 & Approve-before-activate; one active version; legacy Windows paths. \\
+\rowcolor{lightgreen}
+\texttt{test\_metrics.py} & Unit & 4 & Collapsed model equals the majority baseline; confusion matrix; specificity; quality gate; calibration. \\
+\fp{test_api_endpoints.py} & Integration & 26 & Probes; 2FA flow; 401/403; technician cannot confirm a diagnosis or read the history through the API; admin self-registration blocked; 413/422; full cycle to PDF; DICOM; path traversal; audit; compensating storage cleanup. \\
+\rowcolor{lightgreen}
+\fp{test_security_hardening.py} & Integration & 13 & \emph{No token before 2FA; exhausting the code attempts unlocks nothing; forged / ``none''-algorithm / edited-role tokens; only the radiologist confirms (technician, admin, ML engineer get 403); no account enumeration; hostile file names; oversized image; text renamed to image.} \\
+\fp{test_robustness.py} & Integration & 33 & \emph{401 on every endpoint without a token; black / white / noise / RGBA / 16-bit / tiny / very wide images; truncated JPEG; unknown and malformed identifiers; concurrent classification gives one diagnosis; exception-to-HTTP mapping; security headers; no server paths in responses.} \\
+\rowcolor{lightgreen}
+\fp{test_memory_profiling.py} & Profiling & 4 & Peak memory 1024 px; leak checks (decorators and real TensorFlow); Fail-Fast memory. \\
+\fp{test_system_e2e.py} & System & 1 & Technician $\to$ radiologist $\to$ admin through HTTP; audit attribution. \\
+\end{longtable}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.93\textwidth]{terminal_pytest.png}
+\caption{Executed test run (excerpt of \fp{evidence/pytest_run.txt}): 189 passed, total coverage 79\% over \texttt{services}, \texttt{pipeline}, \texttt{domain}, \texttt{api},
+\texttt{infrastructure} and \texttt{ai}. The integration and system tests are repeated against PostgreSQL 16 by the CI workflow.}
+\label{fig:pytest}
+\end{figure}
+
+\noindent\textbf{Interpretation.} The modules with the highest clinical risk have the highest coverage
+(\texttt{auth\_service} 94\%, \texttt{clinical\_results\_service} 93\%, \texttt{stages} 90\%, \texttt{inference\_service} 94\%, decorators 100\%).
+\fp{transfer_learning.py} (57\%) is lower because training needs the dataset and ImageNet weights; its data logic is covered.
+Coverage counts executed lines, not verified behaviour: that is why the suite adds tests whose \emph{failure scenario is the dangerous one}
+(a model that ignores its input, a request without a token, a role that must not confirm a diagnosis, a numeric type change that alters a decision).
+
+\subsection{Memory Profiling}
+
+\begin{table}[H]
+\centering
+\caption{Memory profiling results (\texttt{tracemalloc} and RSS via \texttt{psutil}).}
+\label{tab:memory}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{Y C{3.0cm} C{2.3cm}}
+\rowcolor{verdeUAEM}
+\hd{Measurement} & \hd{Result} & \hd{Threshold} \\
+\rowcolor{lightgreen}
+Peak while validating + normalising a 1024$\times$1024 image (\texttt{test\_memory\_profiling}) & 26.1\,MB & $<$ 40\,MB \\
+Growth over 30 decorated inferences & 7.3\,KB & $<$ 100\,KB \\
+\rowcolor{lightgreen}
+RSS drift over 50 real TensorFlow inferences (after warm-up) & 2.3\,MB & $<$ 30\,MB \\
+Peak when Fail-Fast rejects a 16$\times$16 image & 72\,KB & $<$ 150\,KB \\
+\rowcolor{lightgreen}
+\texttt{ValidationStage} vs.\ int64/float64 reference, same 1024$\times$1024 image & 27.3\,MB vs.\ 59.8\,MB & --- \\
+\end{tabularx}
+\end{table}
+
+\noindent Profiling found two real defects: the validation stage converted the image to
+\texttt{int64}/\texttt{float64} several times (fixed with \texttt{int16}/\texttt{float32}: about $-54\%$ measured against the reference, and the decision equivalence is tested), and the
+metrics decorator stored every latency in an unbounded list (fixed with a ring buffer).
+
+\section{Criterion 3: AI Model Validation and Error Analysis}
+\label{sec:c3}
+
+\subsection{What Is Evaluated}
+
+\fp{ai/evaluate_model.py} evaluates exactly what the Inference Service runs: the CNN softmax on the
+224$\times$224 $[0,1]$ tensor. It reports accuracy, balanced accuracy, macro precision/recall/F1,
+weighted F1, Cohen's $\kappa$, per-class sensitivity and specificity, the confusion matrix, the
+\textbf{majority-class baseline}, a calibration table and every failure case with its real
+probabilities. The annotation-geometry rule is reported separately as a reference (85.15\% agreement with the labels), because it needs
+expert annotations that do not exist at inference time. The test split is used once, after training: early stopping and learning-rate
+decisions use the separate validation split.
+
+\subsection{Model Lifecycle: v1.0.0 (Rejected) and v1.1.0 (Approved)}
+
+Version~1.0.0, the first trained artefact, answered ``C-curve'' for every image; the Milestone~3 review identified it as equivalent to
+the majority-class classifier. It is kept in \fp{models/} as the historical baseline, registered as \emph{not approved} and
+never served. Version~1.1.0 was trained after correcting the input scaling and the class imbalance and is the version that the
+registry activates.
+
+\begin{table}[H]
+\centering
+\caption{Test split (101 images). Source: \fp{models/<version>/evaluation_results.json}; every figure follows from the stored confusion matrix (checked by \texttt{test\_packaged\_v1\_1\_0\_evaluation\_is\_internally\_consistent}).}
+\label{tab:metrics}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{Y C{2.5cm} C{2.5cm} C{2.5cm}}
+\rowcolor{verdeUAEM}
+\hd{Metric} & \hd{v1.0.0} & \hd{v1.1.0} & \hd{Gate} \\
+\rowcolor{lightgreen}
+Accuracy & 44.55\% & \textbf{88.12\%} (89/101) & $>$ 44.55\% (majority) \\
+Balanced accuracy & 33.33\% & \textbf{87.20\%} & $>$ 33.33\% \\
+\rowcolor{lightgreen}
+Macro F1 & 20.55\% & \textbf{88.07\%} & $\geq$ 70\% \\
+Weighted F1 / Cohen's $\kappa$ & 27.47\% / 0.000 & 88.14\% / 0.813 & --- \\
+\rowcolor{lightgreen}
+Sensitivity Normal & 0\% & 87.88\% (29/33) & $\geq$ 60\% \\
+Sensitivity C-curve & 100\% & 91.11\% (41/45) & $\geq$ 60\% \\
+\rowcolor{lightgreen}
+Sensitivity S-curve & 0\% & 82.61\% (19/23) & $\geq$ 60\% \\
+Specificity Normal / C / S & 100\% / 0\% / 100\% & 97.1\% / 85.7\% / 97.4\% & --- \\
+\rowcolor{lightgreen}
+Predicts a single class & yes & no & no \\
+Quality gate & \texttt{approved: false} & \texttt{approved: true} & --- \\
+\end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.47\textwidth}\centering
+\begin{tikzpicture}[scale=0.95]
+    \def\cell#1#2#3#4{\fill[#4] (#1,-#2) rectangle ++(1.4,-1.0); \node[font=\small\bfseries] at (#1+0.7,-#2-0.5) {#3};}
+    \cell{0}{0}{29}{verdeUAEM!55} \cell{1.4}{0}{4}{oroUAEM!35} \cell{2.8}{0}{0}{white}
+    \cell{0}{1}{2}{oroUAEM!25} \cell{1.4}{1}{41}{verdeUAEM!65} \cell{2.8}{1}{2}{oroUAEM!25}
+    \cell{0}{2}{0}{white} \cell{1.4}{2}{4}{oroUAEM!35} \cell{2.8}{2}{19}{verdeUAEM!50}
+    \draw[gray] (0,0) grid[xstep=1.4, ystep=1.0] (4.2,-3);
+    \foreach \l/\x in {Normal/0.7, C/2.1, S/3.5} \node[font=\scriptsize] at (\x,0.3) {\l};
+    \foreach \l/\y in {Normal/0.5, C/1.5, S/2.5} \node[font=\scriptsize, anchor=east] at (-0.1,-\y) {\l};
+    \node[font=\scriptsize\bfseries] at (2.1,0.75) {Predicted};
+    \node[font=\scriptsize\bfseries, rotate=90] at (-1.3,-1.5) {True};
+\end{tikzpicture}\\[-2pt]
+{\footnotesize (a) Confusion matrix, v1.1.0 (the baseline v1.0.0 had all 101 images in the C column)}
+\end{minipage}\hfill
+\begin{minipage}{0.5\textwidth}\centering
+\begin{tikzpicture}
+\begin{axis}[
+    xbar stacked, width=0.78\linewidth, height=6.0cm, bar width=7pt, xmin=0, xmax=1,
+    xlabel={Softmax probability, model v1.1.0}, xlabel style={font=\scriptsize},
+    symbolic y coords={sn,sp,ss,ck,gr,un,wh,bk},
+    ytick=data, yticklabels={Spine $-$30 px,Spine +30 px,Straight spine,Checkerboard,Horizontal gradient,Uniform noise,White image,Black image},
+    yticklabel style={font=\tiny}, xticklabel style={font=\tiny},
+    legend style={font=\tiny, at={(0.5,-0.22)}, anchor=north, legend columns=3},
+    ]
+    \addplot[fill=verdeUAEM!30, draw=verdeUAEM] coordinates {(0.9994,bk) (0.4730,wh) (0.1066,un) (1.0000,gr) (0.0002,ck) (1.0000,ss) (0.9737,sp) (0.9762,sn)};
+    \addplot[fill=oroUAEM!70, draw=oroUAEM] coordinates {(0.0006,bk) (0.0122,wh) (0.0278,un) (0.0000,gr) (0.0163,ck) (0.0000,ss) (0.0251,sp) (0.0238,sn)};
+    \addplot[fill=verdeUAEM!60, draw=verdeUAEM] coordinates {(0.0000,bk) (0.5148,wh) (0.8656,un) (0.0000,gr) (0.9835,ck) (0.0000,ss) (0.0012,sp) (0.0000,sn)};
+    \legend{Normal, C-curve, S-curve}
+\end{axis}
+\end{tikzpicture}\\[-2pt]
+{\footnotesize (b) Input-sensitivity probe, v1.1.0 (v1.0.0: always $\approx$0.78 C)}
+\end{minipage}
+\caption{(a) Confusion matrix of v1.1.0 (rows: true; columns: predicted), from \fp{models/scoliosis_classifier_v1.1.0/evaluation_results.json}. (b) Output of \texttt{python ai/model\_probe.py -{}-version 1.1.0}
+(\fp{probe_results.json}) on eight synthetic, very different inputs: the probabilities change with the image (trimmed range 0.89 against the 0.10 required). The same probe on v1.0.0 gives
+a trimmed range of 0.009: the probability of every class barely moves, which is how a model that ignores its input is detected without any dataset. The probe images are synthetic
+and are \emph{not} a clinical test.}
+\label{fig:confusion}
+\end{figure}
+
+\subsection{Error Analysis}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Where v1.1.0 errs} (12 of 101 images): 4 normal spines read as C-curve, 4 S-curves read as C-curve (severity under-estimation),
+          2 C-curves read as normal and 2 as S-curve. No normal image is read as S-curve and no S-curve as normal. Both clinically relevant error types are
+          covered by mandatory radiologist review (Part~IV).
+    \item \textbf{Confidence.} The softmax probability of the chosen class is above 0.80 for all 101 images (mean 0.9999) while 88.12\% are correct
+          (expected calibration error 0.119; Guo et al., 2017). The probability shown to the user is therefore an indication and not a certainty; the
+          review flag additionally depends on the agreement with the geometric estimate, and every prediction is confirmed by a radiologist.
+    \item \textbf{Size of the evidence.} 101 test images give an uncertainty of roughly $\pm$3--4 percentage points per metric (23 S-curve cases for the lowest sensitivity);
+          the figures describe agreement with the reference labels of this split and are not a prevalence-adjusted clinical estimate.
+    \item \textbf{Causes of v1.0.0 identified and corrected:} (1) input range mismatch between the images ($[0,1]$) and the MobileNetV2 preprocessing ($[0,255]$);
+          (2) class imbalance without class weights; (3) images with too few annotated vertebrae assigned to the C-curve class; (4) no automatic acceptance criterion
+          before activation.
+\end{itemize}
+
+\subsection{Improvements Implemented for Iteration v1.1.0}
+\label{sec:mitig}
+
+\begin{table}[H]
+\centering
+\caption{Improvement implemented for each cause.}
+\label{tab:mitigation}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{L{3.6cm} Y}
+\rowcolor{verdeUAEM}
+\hd{Cause} & \hd{Improvement in the code} \\
+\rowcolor{lightgreen}
+Input scaling & \texttt{Rescaling(2,-1)} inside the model; input contract stored in \texttt{metadata.json} and enforced at run time. \\
+Class imbalance & Class weights (2.21 / 0.59 / 1.17) + augmentation; macro-F1 and balanced accuracy as decision metrics. \\
+\rowcolor{lightgreen}
+Loss of spatial information & Second head branch: $1\times1$ convolution of the $7\times7$ feature map, flattened and concatenated with global pooling. \\
+Label quality & Indeterminate annotations (fewer than four vertebra boxes) excluded and counted. \\
+\rowcolor{lightgreen}
+Model promotion & Quality gate; registry approval; readiness probe tied to an approved model; input-sensitivity probe at load time. \\
+Confidence communication & \texttt{requires\_review} when $p<0.60$ or when CNN and geometry disagree; every prediction is confirmed by a radiologist. \\
+\end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{ui_classification.png}
+\caption{Classification of an upload in the web UI (radiologist session; synthetic test image): diagnosis, probability, curve type and affected vertebrae, model name and version, and the PDF action.}
+\label{fig:uiclass}
+\end{figure}
+
+\subsection{Model Acceptance Checks and How the Corrections Are Verified}
+\label{sec:probe}
+
+Accuracy alone cannot reveal a model that ignores its input when one class dominates the test set. Three checks that do not depend on the dataset are automated
+(\fp{tests/unit/test_model_acceptance.py}, \fp{tests/unit/test_model_input_contract.py}):
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Input-sensitivity probe} (\fp{ai/model_probe.py}): eight very different synthetic images (black, white, noise, gradient, checkerboard,
+          spines) are classified; if the trimmed range of every class probability is below 0.10 the model is \emph{input-insensitive}. When a model is loaded the inference service
+          \emph{refuses to serve} such a model even if \fp{metadata.json} says \texttt{"approved": true} (the flag is only a value; behaviour is what counts).
+          A first version of the threshold used the plain range and missed v1.0.0 because one outlier image (checkerboard) stretched it to 0.105; the trimmed range fixes it.
+    \item \textbf{Input-range contract} (\fp{ScoliosisStrategy.validate_input}): the model expects $[0,1]$. The earlier training code applied \texttt{preprocess\_input}
+          ($[0,255]\to[-1,1]$) to $[0,1]$ images, so the backbone only saw values between $-1$ and $-0.99$ and its ImageNet features were practically constant.
+          The graph now contains a named \texttt{Rescaling} layer (\fp{test_rescaling_layer_maps_0_1_to_minus1_plus1_question_2}). Any input outside $[0,1]$ (for example forgetting to divide by 255)
+          is now rejected with HTTP 422 instead of being silently accepted: before this correction, a random-noise image scaled to $[0,255]$ was classified by v1.1.0 as ``S-curve'' with probability 1.0
+          (\fp{test_values_in_0_255_are_rejected_not_silently_accepted}).
+    \item \textbf{Evaluation after training} (\fp{ai/evaluate_model.py}): macro-F1, balanced accuracy and per-class sensitivity above the gate,
+          \texttt{predicts\_single\_class: false}, stored in \fp{evaluation\_results.json}; a model saved without evaluation metrics is never approved, and training stops with an error
+          when the dataset is missing (a synthetic dataset needs the explicit flag \texttt{ALLOW\_SYNTHETIC\_DATA}).
+\end{itemize}
+
+\noindent\textbf{Training and evaluation commands:}
+\begin{lstlisting}[language={}, numbers=none]
+python ai/train_model.py --version 1.1.0 --dataset <path>/scoliosis2
+python ai/evaluate_model.py --version 1.1.0
+python ai/plot_confusion_matrix.py --version 1.1.0
+python ai/model_probe.py --version 1.1.0
+\end{lstlisting}
+
+\section{Criterion 4: CI/CD Implementation}
+\label{sec:c4}
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    stage/.style={rectangle, rounded corners=4pt, draw=verdeUAEM, fill=lightgreen,
+                  minimum width=2.9cm, minimum height=1.5cm, align=center, font=\scriptsize},
+    fail/.style={rectangle, rounded corners=3pt, draw=red!60, fill=lightred,
+                 minimum width=2.9cm, align=center, font=\tiny, inner sep=3pt},
+    badge/.style={rectangle, rounded corners=6pt, draw=oroUAEM, fill=lightyellow,
+                  align=center, font=\tiny, inner sep=4pt},
+    ]
+    \node[badge] (trig) at (-3.3,0) {push main/develop\\PR to main};
+    \node[stage] (s1) at (0,0) {\textbf{1 lint}\\flake8 (blocking)\\bandit SAST};
+    \node[stage] (s2) at (3.6,0) {\textbf{2 test}\\189 tests, cov $\geq$75\%\\PostgreSQL run\\memory + benchmark};
+    \node[stage] (s3) at (7.2,0) {\textbf{3 build-container}\\build, smoke + replica test\\Trivy CRITICAL\\push GHCR (main)};
+    \node[stage] (s4) at (3.6,-2.6) {\textbf{4 validate-k8s}\\kustomize +\\kubeconform 1.30};
+    \node[stage] (s5) at (10.8,-1.3) {\textbf{5 deploy-staging}\\kind cluster\\rollout + HTTP smoke};
+    \node[badge] (reg) at (10.8,1.2) {ghcr.io image\\tag = commit SHA};
+
+    \draw[arrow] (trig)--(s1); \draw[arrow] (s1)--(s2); \draw[arrow] (s2)--(s3);
+    \draw[arrow] (s1.south) |- (s4.west);
+    \draw[arrow] (s3.east) -- (s5.north west);
+    \draw[arrow] (s4.east) -- (s5.south west);
+    \draw[dasharrow] (s3.north east) -- (reg.west);
+
+    \node[fail, below=0.4cm of s1] {lint / SAST finding $\to$ stop};
+    \node[fail, below=0.4cm of s3] {CVE / failed smoke $\to$ stop};
+\end{tikzpicture}}
+\caption{GitHub Actions workflow \fp{.github/workflows/ci-cd.yml}. Arrows are \texttt{needs:}
+dependencies; \texttt{validate-k8s} runs in parallel with the tests. Deployment to the ephemeral kind
+cluster runs only on pushes to \texttt{main}.}
+\label{fig:cicd}
+\end{figure}
+
+\IfFileExists{figures/github_actions_run.png}{%
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{github_actions_run.png}
+\caption{Real execution of the workflow in GitHub Actions (all five jobs).}
+\label{fig:ciscreen}
+\end{figure}}{\noindent\textit{Execution evidence.} The first run of the workflow on GitHub is shown here once the branch is merged to \texttt{main}; until then
+the same stages were executed locally and their outputs are in \fp{evidence/} (lint and bandit, 189 tests with coverage, Docker smoke test, 2-replica test).}
+
+\begin{table}[H]
+\centering
+\caption{Stages, gates and contribution to reliability.}
+\label{tab:cicd}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{L{2.3cm} Y Y}
+\rowcolor{verdeUAEM}
+\hd{Stage} & \hd{What it does / gate} & \hd{Contribution to reliability} \\
+\rowcolor{lightgreen}
+lint & flake8 fails on syntax errors, undefined names, unused imports/variables; bandit on medium/high findings (both clean locally: \fp{evidence/lint_flake8.txt}, \fp{evidence/bandit.txt}). & Defects caught before execution. \\
+test & 189 tests with \texttt{-{}-cov-fail-under=75}; integration and E2E repeated on a PostgreSQL service; memory profile and benchmark uploaded as artefacts. & No merge breaks RBAC, 2FA, Fail-Fast or inference. \\
+\rowcolor{lightgreen}
+build-container & Builds the image, runs it with \texttt{-{}-read-only}, checks \texttt{/health}, \texttt{/ready} and UID 10001; \emph{runs the 2-replica test (PostgreSQL + load balancer)}; Trivy blocks fixable CRITICAL CVEs; pushes to GHCR on \texttt{main}. & What is deployed is exactly what was tested. \\
+validate-k8s & Renders with kustomize; validates against Kubernetes 1.30 schemas. & Manifest errors found before a cluster. \\
+\rowcolor{lightgreen}
+deploy-staging & kind cluster, image load, Secret creation, \texttt{kubectl apply -k}, rollout wait, HTTP smoke test. & Real deployment test on every release. \\
+\end{tabularx}
+\end{table}
+
+\begin{lstlisting}[language={}, caption={Quality gate of the \texttt{test} job (excerpt of \texttt{ci-cd.yml}).}]
+- name: Run the test suite with coverage gate
+  run: |
+    pytest -v \
+      --cov=services --cov=pipeline --cov=domain --cov=api --cov=infrastructure --cov=ai \
+      --cov-report=xml:coverage.xml --cov-fail-under=75 --junitxml=test-results.xml tests/
+- name: Integration run against PostgreSQL (production database engine)
+  env:
+    TEST_DATABASE_URL: postgresql+psycopg2://medical_ai:ci-only-password@localhost:5432/medical_ai_test
+  run: pytest -q tests/integration tests/system
+\end{lstlisting}
+
+\section{Criterion 5: Containerisation and Deployment}
+\label{sec:c5}
+
+\subsection{Docker}
+
+\begin{lstlisting}[language={}, caption={\texttt{Dockerfile} (key lines).}]
+FROM python:3.11-slim AS builder
+RUN pip wheel --no-cache-dir --wheel-dir /build/wheels -r requirements.txt   # complete wheelhouse
+
+FROM python:3.11-slim AS runner
+RUN --mount=type=bind,from=builder,source=/build/wheels,target=/wheels \
+    pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.txt
+RUN groupadd --gid 10001 medicalgroup \
+ && useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin medicaluser
+COPY . /app/                                   # .dockerignore excludes tests, data, .git, secrets
+USER 10001:10001
+HEALTHCHECK CMD curl -f http://localhost:8000/health || exit 1
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+\end{lstlisting}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Two stages:} the builder resolves all dependencies into wheels; the wheels are bind-mounted into the runner, so they never become an image layer
+          (an earlier version copied them: a 2\,GB layer) and the runner installs from them without network access. Development tools are not installed
+          (\fp{requirements-dev.txt}); a dependency that nothing imports (\texttt{medmnist}, which pulled PyTorch and CUDA) was removed.
+    \item \textbf{Security:} numeric UID/GID 10001, identical to the Kubernetes \texttt{securityContext} (\texttt{runAsUser}, \texttt{fsGroup}); runs with a read-only root
+          filesystem; secrets only through the environment; the model artefacts live in \texttt{/app/models}, outside the \texttt{/app/data} volume.
+    \item \textbf{One worker per container:} TensorFlow already uses the pod's cores for one forward pass and each worker would load its own copy of the model
+          ($\approx$0.8\,GB, against the 2\,GiB pod limit); capacity grows with replicas.
+    \item \textbf{Verified} (\fp{evidence/docker_smoke.txt}, version 3.3.0, 3.7\,GB image): started with \texttt{-{}-read-only}: \texttt{/health} 200, \texttt{/ready} 200 with the
+          approved model v1.1.0, \texttt{id -u} = 10001. Building the image from a clean install also exposed that \texttt{bcrypt}~5 made every login fail (Section~\ref{sec:replicatest}).
+\end{itemize}
+
+\noindent \textbf{Docker Compose} (\fp{docker-compose.yml}) runs the API with \textbf{PostgreSQL 16}
+(health check and \texttt{depends\_on: service\_healthy}), named volumes, a read-only root filesystem and resource limits; secrets come
+from \texttt{.env} (template \texttt{.env.example}) and Compose refuses to start if they are missing (the key that used to be written in the file was removed).
+
+\subsection{Kubernetes}
+
+\textbf{Justification.} Inference is CPU-bound and clinical demand varies during the day; updates of the
+model must not interrupt service. Kubernetes provides rolling updates with \texttt{maxUnavailable: 0},
+CPU-based autoscaling, readiness gating of pods without an approved model and rescheduling on node
+failure. Several replicas require shared state, therefore the database is PostgreSQL and images/reports
+use a \texttt{ReadWriteMany} volume.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    k/.style={rectangle, rounded corners=3pt, draw=verdeUAEM, fill=lightgreen, minimum width=2.7cm,
+              minimum height=0.95cm, align=center, font=\scriptsize},
+    pod/.style={k, fill=white, minimum width=2.3cm},
+    cfg/.style={k, fill=lightyellow, draw=oroUAEM!90!black},
+    st/.style={cylinder, shape border rotate=90, aspect=0.2, draw=gray, fill=lightblue,
+               minimum height=1.0cm, text width=2.4cm, align=center, font=\scriptsize},
+    ]
+    \node[k, fill=lightblue] (user) at (-3.2,0) {Hospital users\\(browser)};
+    \node[k] (ing) at (0,0) {\textbf{Ingress} (nginx)\\HTTPS redirect, 16 MB body};
+    \node[k] (svc) at (3.4,0) {\textbf{Service}\\ClusterIP :80};
+    \node[pod] (p1) at (7.0,1.1) {API pod 1\\UID 10001};
+    \node[pod] (p2) at (7.0,-0.1) {API pod 2};
+    \node[pod, dashed] (p3) at (7.0,-1.3) {API pod 3..6};
+    \node[k] (hpa) at (7.0,2.6) {\textbf{HPA} 2--6, CPU 70\%};
+    \node[k] (pdb) at (10.5,2.6) {\textbf{PDB} minAvailable 1};
+    \node[cfg] (cm) at (3.4,-2.2) {ConfigMap\\Secret};
+    \node[st] (pvc) at (10.6,0.5) {PVC 20 Gi RWX\\\texttt{/app/data}};
+    \node[k] (pg) at (10.6,-1.4) {\textbf{StatefulSet}\\PostgreSQL 16};
+    \node[st] (pgv) at (10.6,-3.0) {PVC 10 Gi\\(RWO)};
+    \node[k, fill=lightblue] (ghcr) at (7.0,-3.0) {GHCR image\\(model baked in)};
+
+    \draw[arrow] (user)--node[lbl, above]{HTTPS}(ing); \draw[arrow] (ing)--(svc);
+    \draw[arrow] (svc)--(p1.west); \draw[arrow] (svc)--(p2.west); \draw[arrow] (svc)--(p3.west);
+    \draw[dasharrow] (hpa)--(p1); \draw[dasharrow] (pdb.west)--(hpa.east);
+    \draw[arrow] (p1.east)--(pvc); \draw[arrow] (p2.east)--(pvc);
+    \draw[arrow] (p2.east)--(pg.west); \draw[arrow] (p3.east)--(pg.west);
+    \draw[arrow] (pg)--(pgv);
+    \draw[dasharrow] (cm.east) -- (p3.south west);
+    \draw[dasharrow] (ghcr)--(p3);
+
+    \begin{scope}[on background layer]
+      \node[draw=verdeUAEM, rounded corners=6pt, fill=verdeUAEM!3, inner sep=10pt,
+            fit=(ing)(svc)(hpa)(pdb)(pvc)(pgv)(cm),
+            label={[font=\scriptsize\bfseries\color{verdeUAEM}]above left:Namespace \texttt{medical-system} (Pod Security Admission: warn/audit restricted)}] {};
+    \end{scope}
+\end{tikzpicture}}
+\caption{Kubernetes deployment diagram of \texttt{k8s/} (\texttt{kubectl apply -k}). Pods use
+\texttt{startupProbe}/\texttt{livenessProbe} on \texttt{/health} and \texttt{readinessProbe} on \texttt{/ready}.}
+\label{fig:k8s}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{Kubernetes manifests in \texttt{k8s/}.}
+\label{tab:k8s}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{L{3.3cm} L{3.2cm} Y}
+\rowcolor{verdeUAEM}
+\hd{Manifest} & \hd{Kind} & \hd{Purpose} \\
+\rowcolor{lightgreen}
+\texttt{namespace.yaml} & Namespace & \texttt{medical-system}; Pod Security Admission labels \emph{warn} and \emph{audit} at the \emph{restricted} level. \\
+\texttt{configmap.yaml} & ConfigMap & Non-sensitive settings; \texttt{ALLOW\_UNAPPROVED\_MODEL: "false"}; TF thread limits. \\
+\rowcolor{lightgreen}
+\fp{secret.example.yaml} & Secret (template) & Keys required; the real Secret is created with \texttt{kubectl create secret} (never committed). It is \emph{not} part of the kustomization: applying it would overwrite the real Secret with placeholders. \\
+\texttt{postgres.yaml} & Service + StatefulSet & Database shared by replicas; non-root (UID 999); per-pod PVC. \\
+\rowcolor{lightgreen}
+\texttt{pvc.yaml} & Persistent\-Volume\-Claim & 20\,Gi \texttt{ReadWriteMany} for radiographs and reports. \\
+\texttt{deployment.yaml} & Deployment & 2 replicas; requests 0.5 CPU/1\,Gi, limits 2 CPU/2\,Gi; probes; read-only root FS; \texttt{drop: ALL}; spread across nodes. \\
+\rowcolor{lightgreen}
+\texttt{service.yaml}, \texttt{ingress.yaml} & Service, Ingress & ClusterIP and HTTPS entry point (16\,MB body limit, 10 requests/s per client IP). \\
+\texttt{hpa.yaml} & Horizontal\-Pod\-Autoscaler & 2--6 replicas at 70\% CPU (memory not used: a TF process does not release it). \\
+\rowcolor{lightgreen}
+\texttt{pdb.yaml} & Pod\-Disruption\-Budget & At least one pod during maintenance. \\
+\fp{kustomization.yaml} & Kustomization & Applies the manifests above (without the Secret) and sets the image tag. \\
+\end{tabularx}
+\end{table}
+
+\clearpage
+\subsection{Replica Test with Real Containers}
+\label{sec:replicatest}
+
+Kubernetes manifests alone do not show that the system works with several replicas. \fp{scripts/replica_test.sh} starts PostgreSQL, \emph{two API replicas
+at the same time} on an empty database and an nginx round-robin balancer, using the final image (read-only, UID 10001, 2 CPUs per replica):
+
+\begin{table}[H]
+\centering
+\caption{Results of the replica test (output in \fp{evidence/replica_test.txt}).}
+\label{tab:replicatest}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{L{5.2cm} Y}
+\rowcolor{verdeUAEM}
+\hd{Check} & \hd{Result} \\
+\rowcolor{lightgreen}
+Concurrent start-up on an empty database & both replicas \texttt{/ready} 200; 0 tracebacks in the start-up logs \\
+2FA code issued by replica 1, verified on replica 2 & \texttt{status: verified} (codes are stored in the database, not in memory) \\
+\rowcolor{lightgreen}
+Upload via replica 1, classify via replica 2 & both 200 (shared storage and database) \\
+Throughput, 1 replica (4 clients) & 9.99 req/s, p95 465\,ms, 0 errors \\
+\rowcolor{lightgreen}
+Throughput, 2 replicas behind the balancer (8 clients) & 19.44 req/s, p95 610\,ms, 0 errors: \textbf{1.95$\times$} (97\% efficiency); earlier runs of the same test gave 1.80--1.84$\times$ \\
+One replica stopped & 20 of 20 requests through the balancer answered 200 \\
+\end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.93\textwidth]{terminal_replica.png}
+\caption{Output of \fp{scripts/replica_test.sh}.}
+\label{fig:replica}
+\end{figure}
+
+\noindent\textbf{Defects found by this test and by building from a clean environment} (all corrected, each with a regression test or a re-run):
+\begin{enumerate}[leftmargin=*]
+    \item \emph{Concurrent start-up.} Two replicas creating the schema at the same time on an empty PostgreSQL both executed \texttt{CREATE TABLE} and one failed with a unique violation
+          (in Kubernetes: \texttt{CrashLoopBackOff} on the first deployment). Fixed with a PostgreSQL advisory lock around the schema creation (\fp{infrastructure/database.py}).
+    \item \emph{Nobody could log in.} With the current \texttt{bcrypt}~5 the library \texttt{passlib}~1.7 raises \texttt{ValueError} while hashing, so the demo users were never created and every login failed;
+          it did not show on a machine with an older \texttt{bcrypt}. \texttt{requirements.txt} now pins \texttt{bcrypt<5}.
+    \item \emph{First start ``not ready''.} The model bootstrap registered, approved and activated v1.1.0 but then judged the stale in-memory object unapproved, so a fresh database started with
+          \texttt{/ready} 503. The active version is now re-read.
+    \item \emph{Model not found in a clean clone and in the containers.} \texttt{MODEL\_DIR} pointed to \texttt{data/models}, which is empty in a clean clone and is hidden by the volume mounted on \texttt{/app/data}; it now defaults to \texttt{models/}.
+\end{enumerate}
+Limits: this is Docker on one host, not a Kubernetes cluster; the CI workflow repeats the test on every build and also deploys to a \texttt{kind} cluster. Behaviour of
+the HPA under real load and with six replicas has not been measured.
+
+\IfFileExists{figures/kubectl_scale_evidence.png}{%
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{kubectl_scale_evidence.png}
+\caption{Real Kubernetes run: pods, HPA and rollout (\texttt{kubectl get pods,hpa}).}
+\label{fig:kubectl}
+\end{figure}}{}
+
+\section{Criterion 6: Performance and Scalability Analysis}
+\label{sec:c6}
+
+\subsection{Methodology}
+
+Three complementary measurements, all reproducible from the repository:
+\begin{enumerate}[leftmargin=*]
+    \item \fp{tests/profiling/benchmark_performance.py} (service layer, in one process, temporary data directory, packaged model v1.1.0): 3 warm-up cycles and 30 measured
+          cycles of preprocessing $\to$ inference $\to$ persistence $\to$ PDF report $\to$ audit with 1024$\times$1024 radiograph-like images.
+    \item \fp{tests/profiling/forward_pass_comparison.py}: three ways of invoking the model on one image.
+    \item HTTP load through the real API: \fp{scripts/load_test.py} against one container, two containers behind a balancer (Section~\ref{sec:replicatest}) and
+          \fp{scripts/process_scaling.py} for 1, 2, 4 and 6 independent processes.
+\end{enumerate}
+Environment of items 1--3 (processes): Linux x86-64, 4 vCPU, Python 3.11, TensorFlow 2.18 (CPU), SQLite; items measured in containers use the image of
+Section~\ref{sec:c5} (TensorFlow 2.21, 2 CPUs per container, PostgreSQL). Absolute values depend on the machine; the ratios are what the analysis uses.
+
+\subsection{Latency and Throughput}
+
+\begin{table}[H]
+\centering
+\caption{Latency per stage (ms) from \fp{evidence/benchmark.json} (30 cycles).}
+\label{tab:latency}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{Y C{1.6cm} C{1.6cm} C{1.6cm} C{1.6cm}}
+\rowcolor{verdeUAEM}
+\hd{Stage} & \hd{Mean} & \hd{Median} & \hd{P95} & \hd{\% of total} \\
+\rowcolor{lightgreen}
+Preprocessing (decode, quality, normalise) & 39.19 & 36.92 & 52.07 & 51.3 \\
+Inference (CNN + geometric estimate) & 23.54 & 23.02 & 27.89 & 30.8 \\
+\rowcolor{lightgreen}
+PDF report & 13.01 & 8.59 & 18.63 & 17.0 \\
+Audit & 0.60 & 0.51 & 1.14 & 0.8 \\
+\rowcolor{lightgreen}
+\textbf{End to end (one cycle)} & \textbf{76.92} & \textbf{69.20} & \textbf{100.74} & --- \\
+\end{tabularx}
+\end{table}
+
+\noindent Sequential throughput of the full cycle: \textbf{13.0 cycles/s}. Process RSS: 771\,MB $\to$ 788\,MB (+17\,MB over 30 cycles). The service layer meets NFR-01
+(P95 $<$ 500\,ms) with a wide margin. Through HTTP the figure depends on concurrency: one container limited to 2 CPUs with 4 concurrent clients had P95 465\,ms (mean 398\,ms),
+and two containers with 8 clients had P95 610\,ms; keeping the load per replica near that of the first case is the purpose of the HPA target (70\% CPU).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{terminal_benchmark.png}
+\caption{Benchmark summary (values identical to \fp{evidence/benchmark.json}).}
+\label{fig:bench}
+\end{figure}
+
+\subsection{Bottleneck and Optimisations Applied}
+
+\begin{table}[H]
+\centering
+\caption{Single-image forward pass of v1.1.0 (50 repetitions, \fp{evidence/forward_pass.json}).}
+\label{tab:forward}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{Y C{2.2cm} C{2.2cm} C{2.2cm}}
+\rowcolor{verdeUAEM}
+\hd{Invocation} & \hd{Mean (ms)} & \hd{P95 (ms)} & \hd{Speed-up} \\
+\rowcolor{lightgreen}
+Eager call \texttt{model(x)} & 143.33 & 158.83 & 1.0$\times$ \\
+\texttt{model.predict(x)} & 71.68 & 84.37 & 2.0$\times$ \\
+\rowcolor{lightgreen}
+Compiled \texttt{tf.function} (used by the service) & 18.58 & 22.76 & \textbf{7.7$\times$} \\
+\end{tabularx}
+\end{table}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Bottleneck now:} preprocessing (51\% of the cycle), dominated by the LANCZOS resize and the entropy/contrast statistics at full resolution; inference is 31\%.
+          A compiled forward pass is 3.9$\times$ faster than \texttt{model.predict()} and 7.7$\times$ faster than an eager call.
+    \item \textbf{Scaling decision:} 2 CPU per pod and horizontal scaling with the HPA (2--6 replicas).
+          \emph{The capacity of six replicas is not obtained by multiplying the figure of one replica by six}: the measurements below show where the speed-up stops even on
+          one machine, and a real cluster adds more losses (Section~\ref{sec:scaling}). The upper limit of 6 replicas is bounded by the PostgreSQL connection pool.
+    \item \textbf{Next optimisations (planned, not implemented):} compute quality metrics on a thumbnail; asynchronous PDF generation for batch workloads; INT8/TFLite quantisation,
+          re-validated with the same evaluation script before approval.
+\end{itemize}
+
+\subsection{Scaling Is Not Linear: Measurements and Limits}
+\label{sec:scaling}
+
+Two independent measurements:
+
+\begin{table}[H]
+\centering
+\caption{Aggregate HTTP throughput (\texttt{POST /classify}, 1024$\times$1024 image) with N independent API processes, each with its own copy of the model, TensorFlow limited to 2 threads (as in the Kubernetes ConfigMap) and 2 clients, on the same 4-vCPU machine.
+Source: \fp{evidence/process_scaling.json} (\fp{scripts/process_scaling.py}).}
+\label{tab:procscaling}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{C{2.4cm} C{3.4cm} C{3.0cm} C{3.2cm}}
+\rowcolor{verdeUAEM}
+\hd{Processes} & \hd{Throughput (req/s)} & \hd{Speed-up} & \hd{Efficiency} \\
+\rowcolor{lightgreen}
+1 & 10.81 & 1.00$\times$ & 100\% \\
+2 & 21.70 & 2.01$\times$ & 100\% \\
+\rowcolor{lightgreen}
+4 & 41.67 & 3.85$\times$ & 96\% \\
+6 & 41.06 & 3.80$\times$ & 63\% \\
+\end{tabularx}
+\end{table}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Processes (Table~\ref{tab:procscaling}):} the speed-up is close to linear while every process has free cores (1, 2 and 4 processes on 4 vCPU) and \emph{stops where the hardware stops}:
+          six processes deliver no more than four (63\% efficiency) because they compete for the same cores and memory bandwidth. Multiplying the figure of one process by the number of replicas is only valid
+          until the node is full.
+    \item \textbf{Real containers (Section~\ref{sec:replicatest}):} one container limited to 2 CPUs versus two containers behind a load balancer reached 1.95$\times$ (1.80--1.84$\times$ in earlier runs). It approaches the ideal 2$\times$
+          because each container is capped at 2 CPUs on a 4-core host; it is a favourable case, not a prediction for six replicas.
+    \item \textbf{Not measured:} six replicas in a real Kubernetes cluster under production load. Any figure for that would be an estimate. \fp{scripts/load_test.py} measures it against any deployed Service.
+\end{itemize}
+
+\noindent Factors that prevent linear scaling in production (at least three apply to this system):
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Shared PostgreSQL:} every classification inserts a prediction and audit rows; connections, locks and commit latency are shared by all replicas.
+    \item \textbf{Shared storage (ReadWriteMany volume):} each request reads the original radiograph from a network volume whose latency and bandwidth are shared and higher than a local disk.
+    \item \textbf{CPU and memory-bandwidth contention:} pods placed on the same node share cores, caches and memory (measured: efficiency falls from 96\% to 63\% when processes exceed the cores).
+    \item \textbf{Load balancing and start-up:} uneven request distribution, connection draining, and the 10--40\,s a new pod needs to load TensorFlow and the model mean the HPA reacts with delay;
+          each replica also duplicates the model in RAM ($\approx$0.8\,GB).
+    \item \textbf{Benchmark representativeness:} the benchmarks use synthetic radiograph-like images; decoding and quality statistics of real radiographs differ.
+\end{enumerate}
+
+\section{Criterion 7: Technical Evidence and Consistency}
+\label{sec:c7}
+
+\subsection{Evidence Artefacts}
+
+\begin{table}[H]
+\centering
+\caption{Evidence produced by the repository.}
+\label{tab:evidence}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{L{6.4cm} Y}
+\rowcolor{verdeUAEM}
+\hd{Artefact} & \hd{Produced by} \\
+\rowcolor{lightgreen}
+\fp{evidence/pytest_run.txt}, \texttt{coverage.xml}, \texttt{test-results.xml} & pytest (local run and CI artefact) \\
+\fp{evidence/memory_profile.txt} & \texttt{test\_memory\_profiling.py -s} \\
+\rowcolor{lightgreen}
+\fp{evidence/benchmark.json}, \fp{evidence/forward_pass.json} & \fp{benchmark_performance.py}, \fp{forward_pass_comparison.py} \\
+\fp{models/<version>/metadata.json} & training + quality gate (v1.0.0: \texttt{"approved": false} with reasons) \\
+\rowcolor{lightgreen}
+\fp{models/<version>/evaluation_results.json}, \fp{confusion_matrix.png} & \texttt{evaluate\_model.py}, \fp{plot_confusion_matrix.py} \\
+\fp{models/<version>/probe_results.json} & \fp{ai/model_probe.py} (input-sensitivity probe) \\
+\rowcolor{lightgreen}
+\fp{evidence/replica_test.txt}, \fp{evidence/process_scaling.json} & \fp{scripts/replica_test.sh}, \fp{scripts/process_scaling.py} \\
+\fp{evidence/rbac_api_demo.txt} & \fp{scripts/rbac_demo.py}: real API calls \\
+\rowcolor{lightgreen}
+\fp{evidence/docker_smoke.txt}, \fp{evidence/lint_flake8.txt}, \fp{evidence/bandit.txt} & Docker smoke test; flake8 and bandit with the CI rules \\
+\texttt{audit\_log} table, \texttt{audit.log} & running system \\
+\end{tabularx}
+\end{table}
+
+\begin{lstlisting}[language={}, caption={\texttt{models/scoliosis\_classifier\_v1.1.0/evaluation\_results.json} (values of the file).}]
+{ "model_name": "scoliosis_classifier", "model_version": "1.1.0", "split": "test",
+  "evaluated_component": "CNN softmax output (same path as the Inference Service)",
+  "total_samples": 101, "accuracy": 0.8812, "balanced_accuracy": 0.872, "macro_f1": 0.8807,
+  "weighted_f1": 0.8814, "cohen_kappa": 0.8133,
+  "confusion_matrix": [[29, 4, 0], [2, 41, 2], [0, 4, 19]], "predicts_single_class": false,
+  "majority_class_baseline": {"class": "SERIOUS SCOLIOSIS (C-CURVE)", "accuracy": 0.4455, "f1_score": 0.2055},
+  "calibration": {"ece": 0.1187, ...}, "total_errors": 12, "failure_cases": [{"file_name": "...", ...}],
+  "quality_gate": {"approved": true, "min_macro_f1": 0.7, "min_class_recall": 0.6, "reasons": []},
+  "annotation_geometry_reference": {"note": "... NOT the deployed CNN model.", "accuracy": 0.8515} }
+\end{lstlisting}
+
+\begin{lstlisting}[language={}, caption={Excerpt of \texttt{evidence/benchmark.json} and \texttt{evidence/process\_scaling.json} (real values).}]
+{ "benchmark_environment": {"iterations": 30, "throughput_requests_per_second": 13.0,
+                            "ram_baseline_mb": 771.1, "ram_peak_mb": 788.4, "ram_growth_mb": 17.38},
+  "latency_stages": {"end_to_end": {"mean_ms": 76.92, "median_ms": 69.2, "p95_ms": 100.74, ...},
+                     "preprocessing": {...}, "inference": {...}, "report_generation": {...}, "audit_logging": {...}},
+  "conclusions": {"primary_bottleneck": "Image preprocessing (decode, validation, quality checks)", ...} }
+{ "cpu_count": 4, "levels": [{"processes": 1, "throughput_rps": 10.81}, {"processes": 2, "throughput_rps": 21.7, "speedup": 2.01},
+                            {"processes": 4, "throughput_rps": 41.67, "speedup": 3.85}, {"processes": 6, "throughput_rps": 41.06, "speedup": 3.8}] }
+\end{lstlisting}
+
+\subsection{The Running System}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.49\textwidth}\centering
+\includegraphics[width=\linewidth]{ui_upload_technician.png}\\{\footnotesize (a) Technician: upload (menu limited by RBAC)}
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}\centering
+\includegraphics[width=\linewidth]{ui_results.png}\\{\footnotesize (b) Radiologist: history, \texttt{pending\_review}}
+\end{minipage}\\[6pt]
+\begin{minipage}{0.49\textwidth}\centering
+\includegraphics[width=\linewidth]{ui_audit.png}\\{\footnotesize (c) Admin: audit trail with user attribution}
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}\centering
+\fbox{\includegraphics[width=0.75\linewidth]{pdf_report_en.png}}\\{\footnotesize (d) Generated PDF report (EN), corrected by the specialist}
+\end{minipage}
+\caption{Screenshots of the system v3.3.0 captured during the documented test session (synthetic test image; no patient data).}
+\label{fig:screens}
+\end{figure}
+
+\subsection{Rubric Traceability}
+
+\begin{longtable}{C{0.3cm} L{3.6cm} L{4.2cm} L{5.4cm}}
+\caption{Milestone 2 rubric (40 pts): where each criterion is satisfied.}\label{tab:m2rubric}\\
+\rowcolor{verdeUAEM}
+\hd{\#} & \hd{Criterion} & \hd{Section} & \hd{Code evidence} \\
+\endfirsthead
+\rowcolor{verdeUAEM}
+\hd{\#} & \hd{Criterion} & \hd{Section} & \hd{Code evidence} \\
+\endhead
+\rowcolor{lightgreen}
+1 & Corrections from M1 & \ref{sec:m1corr} & Table~\ref{tab:m1corr} \\
+2 & Code structure and practices & \ref{sec:arch}, structure listing & layers, DI, flake8 in CI \\
+\rowcolor{lightgreen}
+3 & AI libraries / frameworks & AI module, Table~\ref{tab:stack} & TensorFlow/Keras, scikit-learn, pydicom \\
+4 & Efficiency and performance & Table~\ref{tab:efficiency} & \texttt{tf.function}, caches, dtypes \\
+\rowcolor{lightgreen}
+5 & Data pipeline & Data pipeline section, Figure~\ref{fig:pipeline} & \texttt{pipeline/}, \texttt{load\_split} \\
+6 & AI / learning module & AI module section & \fp{transfer_learning.py}, \texttt{train\_model.py} \\
+\rowcolor{lightgreen}
+7 & Inference / application workflow & Figure~\ref{fig:sequence}, Table~\ref{tab:endpoints} & \texttt{routes.py}, \fp{inference_service.py} \\
+8 & Error handling & Table~\ref{tab:errors} & \fp{utils/exceptions.py} \\
+\rowcolor{lightgreen}
+9 & Logging and robustness & Error handling section & \texttt{logger.py}, \texttt{session\_scope} \\
+10 & Version control and collaboration & Version control section & \texttt{.gitignore}, CI on PRs, CHANGELOG \\
+\rowcolor{lightgreen}
+11 & Consistency with artefacts & This document & identical names in code and diagrams \\
+\end{longtable}
+
+\begin{table}[H]
+\centering
+\caption{Milestone 3 rubric (10 pts): status and evidence. Status reflects what was executed.}
+\label{tab:rubric}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{C{0.4cm} L{3.4cm} C{0.8cm} L{2.6cm} Y}
+\rowcolor{verdeUAEM}
+\hd{\#} & \hd{Criterion} & \hd{Pts} & \hd{Status} & \hd{Evidence} \\
+\rowcolor{lightgreen}
+1 & Corrections from M2 & 1.0 & Implemented & Table~\ref{tab:corrections} \\
+2 & Testing strategy & 2.0 & Implemented, executed & 189/189 tests, 79\% coverage, security and robustness suites, PostgreSQL run in CI, memory profiling \\
+\rowcolor{lightgreen}
+3 & AI validation and error analysis & 2.0 & Implemented, executed: v1.1.0 approved & Section~\ref{sec:c3}: metrics, baseline comparison, error analysis, probe, improvements \\
+4 & CI/CD & 1.5 & Implemented; stages run locally, GitHub run pending merge & 5-job workflow; Trivy and kind stages run on GitHub only \\
+\rowcolor{lightgreen}
+5 & Containerisation and deployment & 1.5 & Implemented; image and 2-replica test verified & Dockerfile, Compose, 10 manifests + kustomization, Table~\ref{tab:replicatest} \\
+6 & Scalability and performance & 1.5 & Implemented, executed (6 replicas not measured) & Tables~\ref{tab:latency}, \ref{tab:forward}, \ref{tab:procscaling}, Section~\ref{sec:scaling} \\
+\rowcolor{lightgreen}
+7 & Evidence and consistency & 0.5 & Implemented & Table~\ref{tab:evidence}, screenshots \\
+\end{tabularx}
+\end{table}
+
+\subsection{Feature Classification by Implementation Tier}
+
+\begin{table}[H]
+\centering
+\caption{All features classified by tier (answer to Milestone~2 observation 6).}
+\label{tab:tiers}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{L{3.3cm} Y}
+\rowcolor{verdeUAEM}
+\hd{Tier} & \hd{Features} \\
+\rowcolor{lightgreen}
+\textbf{Implemented and tested} & Modular monolith with DI; FastAPI REST API; bcrypt; 2-step login with DB-stored one-time codes; JWT; RBAC on every endpoint (only the radiologist confirms); Fail-Fast pipeline with DICOM support and removal of identifiers before storage; Model Registry with quality gate and input-sensitivity probe; input-range contract; CNN inference with review flags; geometric curve estimate; clinical review; bilingual PDF; append-only audit; SQLite and PostgreSQL; memory profiling; benchmarks. \\
+\textbf{Implemented, verified by execution outside CI} & Docker image (read-only, UID 10001); 2-replica test with PostgreSQL and a load balancer; process scaling; web UI flows (screenshots). \\
+\rowcolor{lightgreen}
+\textbf{Implemented, runs only in GitHub Actions} & Trivy scan, kubeconform validation, kind deployment and push to GHCR. \\
+\textbf{Planned (not implemented)} & Real SMS/e-mail gateway for codes; encryption of stored files at rest; privacy notice, consent and data-subject-rights screens; configurable retention; object storage (S3/MinIO); INT8/TFLite quantisation; asynchronous report queue; Cobb-angle measurement by vertebra segmentation; PACS/HL7 integration; regulatory registration as a medical device. \\
+\end{tabularx}
+\end{table}
+
+\section{Response to the Milestone 3 Review}
+\label{sec:response}
+
+The instructor's review distinguishes the working software infrastructure from the validity of the classification model. Table~\ref{tab:response} lists every
+observation, what was changed in the code or in this document, and its status.
+
+\begin{longtable}{L{3.0cm} p{6.0cm} L{3.0cm} L{2.5cm}}
+\caption{Review observations, corrections and status.}\label{tab:response}\\
+\rowcolor{verdeUAEM}
+\hd{Observation} & \hd{Correction} & \hd{Evidence} & \hd{Status} \\
+\endfirsthead
+\rowcolor{verdeUAEM}
+\hd{Observation} & \hd{Correction} & \hd{Evidence} & \hd{Status} \\
+\endhead
+\rowcolor{lightgreen}
+Model: 44.55\% accuracy, every image classified as C-curve; no results of a new version. & Training corrected (input scaling, class weights, augmentation, spatial head); v1.1.0 evaluated on the 101-image test split: 88.12\% accuracy, 87.20\% balanced accuracy, 88.07\% macro-F1, lowest sensitivity 82.61\%, \texttt{approved: true}; quality gate extended with the input-sensitivity probe; the service refuses a model that ignores its input; input contract enforced. & Table~\ref{tab:metrics}; Section~\ref{sec:probe}; \fp{models/scoliosis_classifier_v1.1.0/} & \textbf{Done} \\
+Coverage does not show that critical scenarios were tested. & Targeted tests for the critical risks: model that ignores its input, input range, dtype equivalence, role enforcement through the API, authentication bypass attempts, hostile uploads, concurrent classification. Suite: 189 tests, all executed (\fp{evidence/pytest_run.txt}). & Table~\ref{tab:tests} & Done \\
+\rowcolor{lightgreen}
+CI/CD: show a real run, not only the configuration. & The workflow file now exists in the repository (it did not) and includes the 2-replica test; its stages were executed locally with the same commands and the outputs are in \fp{evidence/}. The screenshot of the first GitHub run is added when the branch is merged to \texttt{main}. & \fp{.github/workflows/ci-cd.yml}; Table~\ref{tab:replicatest} & Local run done; GitHub run pending \\
+Kubernetes manifests do not prove correct operation under scaling. & Real two-replica test with PostgreSQL and a load balancer: concurrent start-up (defects found and fixed), cross-replica 2FA and storage, measured throughput, availability with one replica down. & Section~\ref{sec:replicatest} & Done (Docker); cluster run in CI \\
+\rowcolor{lightgreen}
+Capacity estimates with several replicas are not production measurements. & No extrapolation to six replicas is made. Measured scaling (processes, containers) and the factors that prevent linear scaling are reported; six replicas are explicitly marked as not measured. & Section~\ref{sec:scaling} & Done \\
+Some claims must be contrasted with code and logs. & Figures are generated from files in the repository (evaluation and probe from the JSON files of each model version, benchmark tables from the JSON, terminal captures from real runs); the document was rewritten after auditing the code against the review. Defects found in that audit are listed in Part~IV. & Tables~\ref{tab:evidence}, \ref{tab:m4corr} & Done \\
+\end{longtable}
+
+\begin{table}[H]
+\centering
+\caption{Where each review question is answered (all answers are backed by a test or a measurement).}
+\label{tab:questions}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{C{0.6cm} L{4.2cm} Y}
+\rowcolor{verdeUAEM}
+\hd{Q} & \hd{Topic} & \hd{Answer and evidence} \\
+\rowcolor{lightgreen}
+1 & Accuracy vs.\ baseline & Balanced accuracy of v1.0.0 $=(0+1+0)/3=33.3\%$; it equalled the majority-class classifier (44.55\% accuracy, macro-F1 20.55\%), so it showed no learning. v1.1.0: 87.20\% balanced accuracy, above the baseline. Section~\ref{sec:c3}. \\
+\rowcolor{lightgreen}
+2 & Input range & Section~\ref{sec:probe}: backbone saw $[-1,-0.99]$; fixed with a \texttt{Rescaling} layer; verified by \fp{test_rescaling_layer_maps_0_1_to_minus1_plus1_question_2} and by the run-time contract guard (a $[0,255]$ input is rejected with 422). \\
+3 & Architecture and SOLID & Tables~\ref{tab:archalt}, \ref{tab:solid}: a new model is a new \texttt{IMLStrategy} injected through \texttt{strategy\_factory} (OCP, DIP, LSP); \fp{test_swap_mobilenetv2_with_alternative_strategy_solid_question_3}. \\
+\rowcolor{lightgreen}
+4 & Tests and coverage & Coverage counts executed lines, not verified behaviour. \fp{test_approved_but_constant_model_is_not_served} fails if a constant model could reach production; \fp{test_no_authentication_header_is_401_everywhere} fails if any endpoint is open. \\
+5 & Access control & Section~\ref{sec:auth}: server-side check on every request, 403 for technician, administrator and ML engineer on the review endpoint, Figure~\ref{fig:rbac}. \\
+\rowcolor{lightgreen}
+6 & int64 $\to$ int16/float32 & Fewer bytes per element ($8\to2$ and $8\to4$); peak 59.8\,MB $\to$ 27.3\,MB; risk of overflow/rounding checked by \fp{test_validation_numerics.py} (same decision as a float64 reference on 25 images). \\
+7 & Critical vulnerability & Trivy stage blocks on fixable CRITICAL findings, so the image is not pushed and the \texttt{deploy-staging} job does not run (Table~\ref{tab:cicd}); bandit (SAST) is clean. \\
+\rowcolor{lightgreen}
+8 & Linear scaling & Section~\ref{sec:scaling}: 1.95$\times$ for two containers; 3.85$\times$ for four processes and no gain from six on four cores; shared DB, storage, CPU, balancer, start-up. \\
+9 & Clinical safety & A model with 0\% sensitivity for two classes would miss patients; mandatory review only helps if the reviewer is not anchored by the AI output, so the model must first pass the quality gate (Section~\ref{sec:probe}) and the probability is presented as an indication (Part~IV). \\
+\rowcolor{lightgreen}
+10 & End-to-end demonstration & Figures~\ref{fig:sequence}, \ref{fig:screens}, \ref{fig:rbac}; traceability through \texttt{audit\_log}, \texttt{model\_name/version} in every prediction; a model failing the gate or the probe is not served (\texttt{/ready} 503). \\
+\end{tabularx}
+\end{table}
+
+% ==========================================
+% MILESTONE 4: ETHICAL, LEGAL AND SOCIAL ASPECTS
+% ==========================================
+\newpage
+\section*{MILESTONE 4: ETHICAL, LEGAL AND SOCIAL ASPECTS OF AI SOFTWARE}
+\addcontentsline{toc}{section}{MILESTONE 4: ETHICAL, LEGAL AND SOCIAL ASPECTS OF AI SOFTWARE}
+
+This part follows the Milestone~4 rubric (seven criteria). Milestone~4 asks for no new programming features; the code changes listed here are
+corrections of defects, found by auditing the Milestone~3 code against the review and by running it from a clean environment. Statements about the
+system refer to version~3.3.0 and each one is backed by a test, a measurement or a file of the repository. The system is an academic prototype of a
+\emph{clinical decision-support tool}: it has not been registered as a medical device and it has been exercised only with public and synthetic images, never with real patient data.
+
+\section{Criterion 1: Documentation of Corrections from Milestone 3}
+\label{sec:m4c1}
+
+The review of Milestone~3 separated the working infrastructure from the validity of the classification model. Table~\ref{tab:response} (Part~III) answers each
+observation one by one; Table~\ref{tab:m4corr} lists the problems identified, the modification and the evidence. The second block contains problems that the
+review did not mention but that were found when the code was audited and executed from a clean checkout; they are included because they affect the conclusions of the previous milestones.
+
+\begin{longtable}{C{0.4cm} L{3.5cm} p{6.2cm} L{3.3cm}}
+\caption{Problems addressed, modification performed and evidence.}\label{tab:m4corr}\\
+\rowcolor{verdeUAEM}
+\hd{\#} & \hd{Problem} & \hd{Modification} & \hd{Evidence} \\
+\endfirsthead
+\rowcolor{verdeUAEM}
+\hd{\#} & \hd{Problem} & \hd{Modification} & \hd{Evidence} \\
+\endhead
+\multicolumn{4}{l}{\textbf{A. Observations of the Milestone 3 review}} \\
+\rowcolor{lightgreen}
+1 & Model v1.0.0 predicted ``C-curve'' for all 101 test images (44.55\% accuracy, 33.3\% balanced accuracy). & v1.1.0 trained with correct input scaling, class weights and a spatial head; evaluated once on the held-out split; approved by the quality gate. & Table~\ref{tab:metrics}; \fp{models/} \\
+2 & Coverage does not prove that critical scenarios were tested. & 87 new tests aimed at the dangerous failure of each risk (model that ignores its input, open endpoint, role, dtype). & Table~\ref{tab:tests}; \fp{evidence/pytest_run.txt} \\
+\rowcolor{lightgreen}
+3 & CI/CD shown only as configuration. & The workflow file was missing from the repository although the changelog described it; it was added and its stages executed locally. & \fp{.github/workflows/ci-cd.yml}; \fp{evidence/} \\
+4 & Kubernetes manifests do not prove behaviour under scaling. & Two-replica test with PostgreSQL and a balancer; defects found and fixed (Section~\ref{sec:replicatest}). & \fp{evidence/replica_test.txt} \\
+\rowcolor{lightgreen}
+5 & Multi-replica capacity estimated, not measured. & Extrapolation removed; measured scaling and its limits reported. & Section~\ref{sec:scaling} \\
+6 & Claims not contrasted with code and logs. & Document rebuilt from the repository's files; figures and counts regenerated; this table. & Table~\ref{tab:evidence} \\
+\multicolumn{4}{l}{\textbf{B. Defects found by the audit (not in the review)}} \\
+\rowcolor{lightgreen}
+7 & \textbf{Two-factor login could be bypassed:} \texttt{/auth/login} returned a JWT before the code was verified and blocked it only while the code existed; after 5 wrong codes or on expiry the code was deleted and the token worked. & Login returns no token; the JWT is issued only by \texttt{/auth/verify-2fa}. & \fp{test_exhausting_code_attempts_does_not_unlock_anything} \\
+8 & \textbf{Eleven endpoints accepted requests without any token} (list and upload images, classify, list results, audit trail, generate and download reports). & Authentication is mandatory on every endpoint. & \fp{test_no_authentication_header_is_401_everywhere} \\
+\rowcolor{lightgreen}
+9 & The administrator could confirm diagnoses although the documented rule says only the radiologist. & Review endpoint restricted to the radiologist; UI buttons aligned. & \fp{test_only_the_radiologist_can_confirm_a_diagnosis} \\
+10 & Stored DICOM files kept the patient's identifiers (only an in-memory copy of the metadata was masked, yet \texttt{is\_anonymized} was true). & Identifiers erased before storage; fail closed. & \fp{test_stored_dicom_is_scrubbed} \\
+\rowcolor{lightgreen}
+11 & A noise image scaled to $[0,255]$ was classified ``S-curve'', probability 1.0, with no error. & Run-time input contract (shape, finite, $[0,1]$) and sensitivity probe at load time. & \fp{test_model_input_contract.py} \\
+12 & On a clean install nobody could log in (\texttt{bcrypt}~5 with \texttt{passlib}~1.7). & \texttt{bcrypt<5} pinned. & Section~\ref{sec:replicatest} \\
+\rowcolor{lightgreen}
+13 & A fresh database started \texttt{/ready} 503; a clean clone and the containers did not find the model. & Active version re-read after the bootstrap; \texttt{MODEL\_DIR} defaults to \texttt{models/}. & \fp{evidence/replica_test.txt} \\
+14 & Real Kubernetes Secret, signing key in \texttt{docker-compose.yml}, demo database and reports committed; demo users and a public default key also in production. & Removed from version control; production refuses a weak or default key and creates no demo users; \texttt{.gitignore}, \texttt{.dockerignore}. & \fp{CHANGELOG.md} 3.3.0 \\
+\rowcolor{lightgreen}
+15 & \texttt{kustomization.yaml} applied the example Secret (placeholders would overwrite the real one); \texttt{medmnist} pulled PyTorch and CUDA into the image; wheels stored as a 2\,GB layer. & Secret excluded from kustomize; dependency removed; wheels bind-mounted. & \fp{k8s/}, \fp{Dockerfile} \\
+16 & Wildcard CORS with credentials; server paths and internal error text in responses; account enumeration in password recovery. & Configured origins, security headers, generic errors, uniform recovery answer. & \fp{test_robustness.py} \\
+\rowcolor{lightgreen}
+17 & Documentation inconsistent with the code (test count, coverage, two metrics, a benchmark conclusion that named the wrong bottleneck, a ``Pod Security'' claim). & Corrected here and in \fp{CHANGELOG.md}; the benchmark derives the bottleneck from its data; namespace labels added. & This document \\
+\end{longtable}
+
+\section{Criterion 2: Ethical Considerations in AI Software Development}
+\label{sec:m4c2}
+
+Scoliosis screening has an unusual ethical profile: errors are not catastrophic when a specialist reads every result, but they become harmful when the tool is trusted blindly. The
+design therefore treats the model as an \emph{assistant whose output is a proposal}. Table~\ref{tab:ethics} shows how each ethical issue shaped the design and where it is enforced.
+
+\begin{table}[H]
+\centering
+\caption{Ethical issues, their influence on the design and enforcement in the system.}
+\label{tab:ethics}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{L{2.6cm} Y Y}
+\rowcolor{verdeUAEM}
+\hd{Principle} & \hd{Design decision} & \hd{Where it is enforced} \\
+\rowcolor{lightgreen}
+Human oversight and autonomy & Every prediction is stored as \texttt{pending\_review}; only a radiologist can confirm or correct it, and the reviewer recorded is the owner of the signed token. & \texttt{POST /results/\{id\}/review} returns 403 to any other role (Figure~\ref{fig:rbac}); \texttt{requires\_review} flag. \\
+Non-maleficence (avoid harm) & A model reaches users only after passing a per-class acceptance gate and a behavioural probe; unacceptable versions are registered but never served. & \fp{passes_quality_gate}, \fp{model_probe.py}, \texttt{/ready} 503. \\
+\rowcolor{lightgreen}
+Transparency & The user sees the probability of every class, the model name and version, the curve type and an independent geometric estimate that can disagree with the CNN; the PDF states that the report is decision support. & \texttt{all\_probabilities}, \texttt{model\_version} in each result, PDF disclaimer (ES/EN). \\
+Honest communication of confidence & The probability of v1.1.0 is high even on its errors (ECE 0.119); it is shown as an indication, and low confidence or CNN--geometry disagreement forces a review flag. & Section~\ref{sec:c3}; \texttt{CONFIDENCE\_THRESHOLD} 0.60. \\
+\rowcolor{lightgreen}
+Accountability & Append-only audit trail (no update or delete in the repository) with user, action and Mexico City time; every prediction is traceable to a model version and a reviewer. & \texttt{audit\_log}, \texttt{AuditRepository}, \texttt{GET /audit}. \\
+Justice and equal treatment & Per-class recall is a gate criterion so that no class is sacrificed for overall accuracy; subgroup analysis is limited by the dataset (Section~\ref{sec:m4c3}). & \texttt{min\_class\_recall} 0.60. \\
+\rowcolor{lightgreen}
+Privacy and confidentiality & Collect the minimum: identifiers are erased from DICOM files before storage, roles limit who sees results, secrets stay outside the repository. & Section~\ref{sec:m4c4}. \\
+Avoiding misuse & Inputs that are not radiographs (colour photographs, documents, scenes) are rejected; the interface and report state the intended use. & \texttt{ValidationStage}; Table~\ref{tab:tests}. \\
+\end{tabularx}
+\end{table}
+
+\noindent\textbf{Automation bias.} A radiologist who sees ``confidence 99.99\%'' may confirm without looking. The mitigation is organisational as much as technical: the review is mandatory and recorded,
+the geometric estimate offers an independent signal, and the deployment recommendations (Section~\ref{sec:m4c6}) include a silent pilot in which the radiologist decides before seeing the output.
+
+\section{Criterion 3: Bias, Fairness and Responsible AI}
+\label{sec:m4c3}
+
+\begin{table}[H]
+\centering
+\caption{Potential sources of bias, consequence and strategy.}
+\label{tab:bias}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{L{2.2cm} Y Y Y}
+\rowcolor{verdeUAEM}
+\hd{Level} & \hd{Source} & \hd{Possible consequence} & \hd{Strategy} \\
+\rowcolor{lightgreen}
+Data & Single public dataset (Roboflow \emph{scoliosis2}) with no demographic attributes (age, sex, ethnicity) and unknown acquisition devices. & Performance may differ for populations or equipment not represented; this cannot be measured with the data available. & External validation with local hospital images before any pilot; record age group, sex and device in the study metadata to report subgroup metrics. \\
+Data & Class imbalance: 44.6\% of the test split is C-curve; S-curve is the smallest class. & A model can look accurate while ignoring a class (it happened with v1.0.0). & Class weights (2.21/0.59/1.17); macro-F1, balanced accuracy and per-class recall as decision metrics; gate on every class. \\
+\rowcolor{lightgreen}
+Labels & Classes are derived from expert vertebra boxes by a geometric rule (85\% agreement with the reference); indeterminate images are excluded. & The model learns the rule's view of scoliosis, not a Cobb-angle diagnosis; cases the rule cannot label are never evaluated. & Reported as agreement with reference labels; review flag when the independent geometry disagrees; planned: Cobb-angle labels from a specialist. \\
+Data & Augmented copies of the source radiographs (1\,535 training images). & Near-duplicates across splits would inflate results. & The test split is never used for training or selection; list of source studies per split to be audited before external publication. \\
+\rowcolor{lightgreen}
+Algorithm & Transfer learning from ImageNet; small test set (101 images, $\approx\pm$4 points). & Fine differences between versions cannot be resolved; features not tailored to radiographs. & Report uncertainty; compare versions with the same split; collect more data (Section~\ref{sec:m4c6}). \\
+Output & Errors are not symmetric: 4 of 23 S-curves read as C-curve (17\% severity under-estimation), 4 of 33 normal spines read as C-curve (12\% false alarms), over-confident probabilities. & Delayed attention to severe cases; unnecessary referrals. & Mandatory radiologist review; calibration monitoring; planned temperature scaling. \\
+\rowcolor{lightgreen}
+Use & Automation bias; deployment in a different hospital (distribution shift). & Errors replicated at scale. & Silent pilot; per-site acceptance run of the same evaluation script; periodic review of the audit trail. \\
+\end{tabularx}
+\end{table}
+
+\noindent\textbf{Fairness measurable today.} The only available partition is by class: sensitivity ranges from 82.6\% (S-curve) to 91.1\% (C-curve), a spread of 8.5 points, and the gate requires at least 60\% for each.
+Group fairness (by sex, age or ethnicity) cannot be evaluated honestly because the dataset has no such attributes; reporting a number would be misleading. The project therefore commits to measure it as soon as local data with those fields
+is available, and treats the absence of the measurement as a limitation of the evidence, not as proof of equal performance.
+
+\section{Criterion 4: Data Privacy, Security and Legal Compliance}
+\label{sec:m4c4}
+
+\subsection{Applicable Framework}
+
+Health data are \emph{sensitive personal data}. The following instruments were identified for a deployment in Mexico; the references to foreign regulations are comparison frameworks and are
+not binding unless data of residents of those jurisdictions are processed.
+
+\begin{table}[H]
+\centering
+\caption{Regulations and standards considered.}
+\label{tab:law}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{L{4.0cm} Y}
+\rowcolor{verdeUAEM}
+\hd{Instrument} & \hd{Relevance to this project} \\
+\rowcolor{lightgreen}
+Political Constitution, art.~16 & Right to the protection of personal data and to access, rectify, cancel and object (ARCO rights). \\
+Federal Law on the Protection of Personal Data Held by Private Parties (LFPDPPP; new law published in the DOF on 20~March 2025, in force the following day, supervised by the Secretar\'ia Anticorrupci\'on y Buen Gobierno) & Applies to a private hospital or clinic that deploys the system: privacy notice, express consent for sensitive data, security measures, ARCO procedure, data-processor agreements. \\
+\rowcolor{lightgreen}
+General Law on the Protection of Personal Data Held by Obligated Subjects (LGPDPPSO) & Applies instead when the deployer is a public institution (e.g.\ IMSS, ISSSTE, state health services). \\
+General Health Law and NOM-004-SSA3-2012 (clinical record) & Content, integrity and retention of the clinical record; secondary sources give a minimum retention of five years from the last medical act. The prediction and its review are part of the record that the physician owns. \\
+\rowcolor{lightgreen}
+NOM-024-SSA3-2012 (electronic health record information systems) & Functional and security requirements for systems that handle electronic records: user identification, access control, audit, integrity. \\
+COFEPRIS (NOM-241-SSA1 and the software-as-a-medical-device pathway) & Software that supports diagnosis is likely to be regulated as a medical device: sanitary registration is required before clinical use. \emph{This prototype is not registered and must not be used on patients.} \\
+\rowcolor{lightgreen}
+Reference frameworks: GDPR (art.~9, 22, 25), HIPAA, ISO/IEC 27001 and 27701, IMDRF SaMD & Used as design references (privacy by design, human intervention in automated decisions, risk-based classification); no certification or HIPAA ``Safe Harbor'' compliance is claimed. \\
+\end{tabularx}
+\end{table}
+
+\subsection{How Personal and Sensitive Information Is Protected}
+
+\begin{table}[H]
+\centering
+\caption{Technical measures, status and evidence.}
+\label{tab:privacy}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{L{3.7cm} L{2.4cm} Y}
+\rowcolor{verdeUAEM}
+\hd{Measure} & \hd{Status} & \hd{Evidence / detail} \\
+\rowcolor{lightgreen}
+Identifier removal & Implemented & Direct identifiers and private tags are erased from DICOM files before they are written to disk; fail closed (\texttt{test\_stored\_dicom\_is\_scrubbed}). \\
+Authentication & Implemented & bcrypt; password plus 6-digit code (HMAC-SHA256 digest, 5 min, 5 attempts); JWT only after the code; 60 min expiry. \\
+\rowcolor{lightgreen}
+Authorisation & Implemented & Server-side RBAC on every endpoint; 401 without token, 403 for the wrong role (Figure~\ref{fig:rbac}). \\
+Audit & Implemented & Append-only audit log with user and time; retention constant 5 years. \\
+\rowcolor{lightgreen}
+Secrets & Implemented & No secret in the repository; production refuses a missing or weak key; no demo users and no codes in logs in production. \\
+Transport & Configured & Ingress redirects to HTTPS; the certificate must be provisioned by the hospital; security headers and \texttt{no-store} on the API. \\
+\rowcolor{lightgreen}
+Hardening & Implemented & Non-root container, read-only root filesystem, dropped capabilities, upload limit 15\,MB, rate limit at the ingress, bandit and Trivy gates in CI. \\
+Data minimisation & Partial & Only the image, the prediction, the review and the audit are stored; the original file name is kept and printed in the report, so file names must not contain patient names. \\
+\rowcolor{lightgreen}
+Encryption at rest & \emph{Not implemented} & Images and database depend on the encryption of the volume and of PostgreSQL provided by the deployment. \\
+Privacy notice, consent, ARCO procedure & \emph{Not implemented} & Organisational duties of the hospital as controller; no screens or workflows exist in the prototype. \\
+\rowcolor{lightgreen}
+Retention and deletion & \emph{Not implemented} & No automatic deletion; the five-year audit retention is a constant, not an enforced job. \\
+\end{tabularx}
+\end{table}
+
+\noindent\textbf{Responsibilities.} Under the LFPDPPP the hospital is the controller (\emph{responsable}); the team or a vendor operating the system would be a processor (\emph{encargado}) and needs a contract.
+The three items marked as not implemented are therefore prerequisites for a pilot, listed in Section~\ref{sec:m4c6}, and are not claimed as features.
+
+\section{Criterion 5: Social Impact and Accessibility}
+\label{sec:m4c5}
+
+\begin{table}[H]
+\centering
+\caption{Potential social impacts.}
+\label{tab:social}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{L{2.0cm} Y Y}
+\rowcolor{verdeUAEM}
+\hd{Type} & \hd{Impact} & \hd{Consideration in the project} \\
+\rowcolor{lightgreen}
+Positive & Earlier detection where specialists are scarce: a second reading in under 0.1\,s of compute per image, on CPU only. & Runs without GPU (Table~\ref{tab:latency}); a technician can upload, a radiologist prioritises \texttt{pending\_review}. \\
+Positive & Consistent, traceable documentation of each study (bilingual report, audit). & PDF in Spanish or English; \texttt{audit\_log}. \\
+\rowcolor{lightgreen}
+Negative & Over-reliance and loss of reading skills; false reassurance when the output says ``no scoliosis''. & Mandatory review; the interface says it is decision support; training and silent pilot. \\
+Negative & Inequity: a tool validated on one population deployed on another; benefits only for hospitals that can afford the infrastructure. & External validation per site; open, containerised and CPU-only deployment lowers the barrier. \\
+\rowcolor{lightgreen}
+Negative & Unnecessary referrals (12\% of normal spines read as C-curve) and anxiety for patients and families. & Review before any communication to the patient. \\
+Neutral & Changes in the technician's and radiologist's workflow. & Roles and menus reproduce the existing division of work (Table~\ref{tab:rbac}). \\
+\end{tabularx}
+\end{table}
+
+\noindent\textbf{Accessibility and inclusion.} The portal is bilingual (Spanish and English, switchable at any time), has light and dark themes, labelled form fields, messages in plain language
+for every rejection (``Image too small (16x16). Minimum: 32x32'') and works in a standard browser with no installation. Reports are available in both languages with Mexico City time.
+\emph{Limits:} no formal WCAG audit and no screen-reader or keyboard-only testing have been carried out, the interface has no ARIA landmarks, results rely partly on colour (always accompanied by text),
+and indigenous languages are not supported. Priorities for a pilot: an accessibility review with real users (technicians, radiologists, patients' representatives), ARIA labels and focus order, and a plain-language
+summary for patients written by the physician rather than generated by the system.
+
+\section{Criterion 6: Responsible Deployment and Risk Mitigation}
+\label{sec:m4c6}
+
+\begin{table}[H]
+\centering
+\caption{Risk register (L = likelihood, I = impact; H/M/L).}
+\label{tab:risks}
+\renewcommand{\arraystretch}{1.2}
+\footnotesize
+\begin{tabularx}{\textwidth}{L{3.1cm} C{0.6cm} C{0.6cm} Y L{3.0cm}}
+\rowcolor{verdeUAEM}
+\hd{Risk} & \hd{L} & \hd{I} & \hd{Mitigation} & \hd{Residual / owner} \\
+\rowcolor{lightgreen}
+Wrong classification confirmed without care & M & H & Mandatory review recorded in the audit; review flag; silent pilot; training. & Reader fatigue; hospital. \\
+Model that ignores its input reaches production & L & H & Gate, probe at load time, input contract, \texttt{/ready} 503 (tests). & Low; ML engineer. \\
+\rowcolor{lightgreen}
+Performance drop at another site (distribution shift) & H & H & External validation with the same script before activation; periodic re-evaluation; rollback to the previous version in the registry. & Needs local data; ML engineer. \\
+Unauthorised access to results & L & H & 2FA, RBAC on every endpoint, rate limit, audit, non-root container. & Password hygiene; administrator. \\
+\rowcolor{lightgreen}
+Leak of identifiers & M & H & Erasure of DICOM identifiers before storage; no PHI in logs; secrets outside the repository. & File names, storage encryption; hospital. \\
+Exposure of secrets & M & H & Production refuses weak keys; \texttt{.gitignore}; Secret created outside Git; rotation of the key that had been committed. & Key rotation by the team. \\
+\rowcolor{lightgreen}
+Service outage / overload & M & M & Probes, HPA 2--6, PDB, rolling updates, measured scaling limits. & Six replicas not measured. \\
+Use outside the intended purpose (non-radiographs, paediatric subgroups not studied) & M & M & Fail-Fast rejection; intended-use text; no use on patients before COFEPRIS registration. & Regulatory; hospital. \\
+\rowcolor{lightgreen}
+Regulatory non-compliance & M & H & Legal analysis (Table~\ref{tab:law}); no clinical use of the prototype; privacy notice, consent, ARCO and retention as pilot prerequisites. & Open; hospital and legal counsel. \\
+\end{tabularx}
+\end{table}
+
+\noindent\textbf{Human oversight mechanisms.} (1) Mandatory confirmation by the radiologist; (2) review flag on low confidence or disagreement with the geometric estimate; (3) administrator and ML engineer cannot confirm diagnoses;
+(4) audit trail reviewed periodically; (5) any model version can be deactivated and the previous approved one reactivated without changing the code.
+
+\noindent\textbf{Responsible use recommendations.}
+\begin{enumerate}[leftmargin=*]
+    \item Do not use the prototype on patients: registration with COFEPRIS and a clinical validation study are required first.
+    \item Before a pilot: privacy notice and consent for sensitive data, ARCO procedure, retention policy, encryption at rest, HTTPS certificate, processor agreement, rotation of every key that has been in the repository.
+    \item Run the evaluation script on local labelled images (external validation) and accept the model only if it passes the same gate for every class and for every available subgroup.
+    \item Start with a \emph{silent mode}: the radiologist records a reading before seeing the output; compare, then enable the output.
+    \item Monitor the audit trail and the proportion of corrected predictions; a rise in corrections is the signal to stop and re-evaluate.
+    \item Train users on what the probability means (Section~\ref{sec:c3}) and on the limits of the tool.
+\end{enumerate}
+
+\section{Criterion 7: Final Integration, Technical Consistency and Conclusions}
+\label{sec:m4c7}
+
+\begin{table}[H]
+\centering
+\caption{Consistency between milestones, software and analysis.}
+\label{tab:consistency}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{L{3.0cm} Y}
+\rowcolor{verdeUAEM}
+\hd{Milestone} & \hd{What the final software and document show} \\
+\rowcolor{lightgreen}
+1 (design) & Modular monolith, patterns and SOLID as designed; the Decorator wraps only inference; the model is replaceable through \texttt{IMLStrategy} (tested). \\
+2 (implementation) & Class and file names, endpoints, RBAC matrix and error table match the code; the role rule (radiologist only) is now enforced and tested. \\
+\rowcolor{lightgreen}
+3 (validation) & Tests, CI/CD, containers and measurements correspond to files of the repository; v1.1.0 replaces the rejected baseline. \\
+4 (ethics, law, society) & Each ethical and legal statement refers to a mechanism of the system or is marked as not implemented. \\
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Capabilities and limitations of the project.}
+\label{tab:capabilities}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{Y Y}
+\rowcolor{verdeUAEM}
+\hd{Capabilities (with evidence)} & \hd{Limitations (stated openly)} \\
+\rowcolor{lightgreen}
+Classifies AP radiographs into three classes with 88.1\% accuracy, 87.2\% balanced accuracy and at least 82.6\% sensitivity per class on a 101-image split. & Agreement with reference labels derived by a rule; small split ($\pm$4 points); no demographic data; no external validation. \\
+Rejects models that ignore their input and inputs outside the contract. & Probabilities are over-confident (ECE 0.119); not a calibrated risk. \\
+\rowcolor{lightgreen}
+Enforces authentication, 2FA and role rules on every endpoint; keeps an audit trail. & Simulated SMS gateway; no privacy notice, consent, ARCO workflow, encryption at rest or automatic retention. \\
+Runs in a hardened container, with PostgreSQL, two replicas measured at 1.95$\times$, 189 tests and a CI workflow. & Six replicas and a real Kubernetes cluster not measured; the first GitHub run is pending the merge to \texttt{main}. \\
+\rowcolor{lightgreen}
+About 77\,ms of compute per radiograph on CPU (service layer, mean). & Not registered as a medical device; not for use on patients. \\
+\end{tabularx}
+\end{table}
+
+\noindent\textbf{Conclusions.} The project delivers a working, documented and tested decision-support prototype whose behaviour matches its documentation: the model that failed the quality gate in Milestone~3 was
+replaced by a version that passes it, the software was audited against the review and against a clean installation, and the defects found (an authentication bypass, open endpoints, identifiers stored on disk and a
+deployment that could not start) were corrected with regression tests. The ethical, legal and social analysis shows that the main risks are not computational but organisational: confidence that is higher than the evidence
+supports, populations not represented in the data, and obligations of the data controller that a prototype cannot fulfil on its own. The next steps are therefore external validation with local data, the privacy and consent
+procedures, calibration and a regulatory pathway, before any use on patients.
+
+\begin{table}[H]
+\centering
+\caption{Milestone 4 rubric (10 pts): where each criterion is addressed.}
+\label{tab:m4rubric}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{C{0.4cm} L{4.6cm} C{0.8cm} Y}
+\rowcolor{verdeUAEM}
+\hd{\#} & \hd{Criterion} & \hd{Pts} & \hd{Section and evidence} \\
+\rowcolor{lightgreen}
+1 & Documentation of corrections from Milestone 3 & 1.0 & Section~\ref{sec:m4c1}, Table~\ref{tab:m4corr}, Table~\ref{tab:response} \\
+2 & Ethical considerations & 1.5 & Section~\ref{sec:m4c2}, Table~\ref{tab:ethics} \\
+\rowcolor{lightgreen}
+3 & Bias, fairness and responsible AI & 1.5 & Section~\ref{sec:m4c3}, Table~\ref{tab:bias}, Table~\ref{tab:metrics} \\
+4 & Data privacy, security and legal compliance & 2.0 & Section~\ref{sec:m4c4}, Tables~\ref{tab:law}, \ref{tab:privacy} \\
+\rowcolor{lightgreen}
+5 & Social impact and accessibility & 1.5 & Section~\ref{sec:m4c5}, Table~\ref{tab:social} \\
+6 & Responsible deployment and risk mitigation & 1.5 & Section~\ref{sec:m4c6}, Table~\ref{tab:risks} \\
+\rowcolor{lightgreen}
+7 & Final integration and technical consistency & 1.0 & Section~\ref{sec:m4c7}, Tables~\ref{tab:consistency}, \ref{tab:capabilities} \\
+\end{tabularx}
+\end{table}
+
+% ==========================================
+\newpage
+\section*{References}
+\addcontentsline{toc}{section}{References}
+
+\begin{description}[leftmargin=0.5in, labelindent=0in, itemsep=6pt, style=nextline, font=\normalfont]
+\item[] Abadi, M., Barham, P., Chen, J., Chen, Z., Davis, A., Dean, J., \ldots\ Zheng, X. (2016). TensorFlow: A system for large-scale machine learning. In \emph{Proceedings of the 12th USENIX Symposium on Operating Systems Design and Implementation} (pp.\ 265--283). USENIX Association.
+\item[] Cohn, M. (2009). \emph{Succeeding with agile: Software development using Scrum}. Addison-Wesley.
+\item[] Fowler, M. (2002). \emph{Patterns of enterprise application architecture}. Addison-Wesley.
+\item[] Gamma, E., Helm, R., Johnson, R., \& Vlissides, J. (1994). \emph{Design patterns: Elements of reusable object-oriented software}. Addison-Wesley.
+\item[] Guo, C., Pleiss, G., Sun, Y., \& Weinberger, K. Q. (2017). On calibration of modern neural networks. In \emph{Proceedings of the 34th International Conference on Machine Learning} (pp.\ 1321--1330). PMLR.
+\item[] He, H., \& Garcia, E. A. (2009). Learning from imbalanced data. \emph{IEEE Transactions on Knowledge and Data Engineering, 21}(9), 1263--1284. \url{https://doi.org/10.1109/TKDE.2008.239}
+\item[] Kaufman, S., Rosset, S., Perlich, C., \& Stitelman, O. (2012). Leakage in data mining: Formulation, detection, and avoidance. \emph{ACM Transactions on Knowledge Discovery from Data, 6}(4), Article 15. \url{https://doi.org/10.1145/2382577.2382579}
+\item[] Konieczny, M. R., Senyurt, H., \& Krauspe, R. (2013). Epidemiology of adolescent idiopathic scoliosis. \emph{Journal of Children's Orthopaedics, 7}(1), 3--9. \url{https://doi.org/10.1007/s11832-012-0457-4}
+\item[] Martin, R. C. (2017). \emph{Clean architecture: A craftsman's guide to software structure and design}. Prentice Hall.
+\item[] Roboflow. (n.d.). \emph{Scoliosis2} [Data set]. Roboflow Universe.
+\item[] Sandler, M., Howard, A., Zhu, M., Zhmoginov, A., \& Chen, L.-C. (2018). MobileNetV2: Inverted residuals and linear bottlenecks. In \emph{Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition} (pp.\ 4510--4520). \url{https://doi.org/10.1109/CVPR.2018.00474}
+\item[] Weinstein, S. L., Dolan, L. A., Wright, J. G., \& Dobbs, M. B. (2013). Effects of bracing in adolescents with idiopathic scoliosis. \emph{New England Journal of Medicine, 369}(16), 1512--1521. \url{https://doi.org/10.1056/NEJMoa1307337}
+\item[] Diario Oficial de la Federaci\'on. (2025, 20 de marzo). \emph{Ley Federal de Protecci\'on de Datos Personales en Posesi\'on de los Particulares}. \url{https://www.diputados.gob.mx/LeyesBiblio/pdf/LFPDPPP.pdf}
+\item[] Secretar\'ia de Salud. (2012). \emph{NOM-004-SSA3-2012, Del expediente cl\'inico}. Diario Oficial de la Federaci\'on.
+\item[] Secretar\'ia de Salud. (2012). \emph{NOM-024-SSA3-2012, Sistemas de informaci\'on de registro electr\'onico para la salud}. Diario Oficial de la Federaci\'on.
+\item[] Wiggins, A. (2011). \emph{The twelve-factor app}. \url{https://12factor.net}
+\end{description}
+
+\end{document}

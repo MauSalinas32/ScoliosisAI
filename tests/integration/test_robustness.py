@@ -96,3 +96,46 @@ class TestTransportHardening:
         assert res.headers["X-Content-Type-Options"] == "nosniff"
         assert res.headers["X-Frame-Options"] == "DENY"
         assert res.headers["Cache-Control"] == "no-store"
+
+
+class TestCentralErrorMapping:
+    @pytest.mark.parametrize("exc_name,status", [
+        ("AuthenticationError", 401), ("OneTimeCodeError", 401), ("AuthorizationError", 403),
+        ("FileSizeExceededError", 413), ("UnsupportedFormatError", 422), ("CorruptedImageError", 422),
+        ("ImageQualityError", 422), ("InvalidModelInputError", 422), ("ModelNotLoadedError", 503),
+        ("ModelNotFoundError", 404), ("InferenceError", 500), ("RepositoryError", 500),
+    ])
+    def test_status_for_every_domain_exception(self, exc_name, status):
+        import inspect
+        from api.error_handlers import status_for
+        from utils import exceptions
+        cls = getattr(exceptions, exc_name)
+        params = [p for p in inspect.signature(cls.__init__).parameters.values()
+                  if p.name != "self" and p.default is inspect.Parameter.empty and p.kind in (p.POSITIONAL_OR_KEYWORD,)]
+        exc = cls(16.2, 15) if exc_name == "FileSizeExceededError" else cls(*["x"] * len(params))
+        assert status_for(exc) == status
+
+    def test_unexpected_error_hides_internals(self):
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+        from api.error_handlers import register_exception_handlers
+
+        app = FastAPI()
+        register_exception_handlers(app)
+
+        @app.get("/boom")
+        def boom():
+            raise RuntimeError("secret internal detail: /etc/passwd")
+
+        res = TestClient(app, raise_server_exceptions=False).get("/boom")
+        assert res.status_code == 500
+        assert "secret" not in res.text and "passwd" not in res.text
+
+
+def test_report_response_does_not_disclose_server_paths(client, auth_tokens, sample_xray_image):
+    up = client.post("/api/v1/images/upload", files={"file": ("r.jpg", sample_xray_image, "image/jpeg")}, headers=_headers(auth_tokens))
+    cl = client.post(f"/api/v1/classify/{up.json()['image_id']}", headers=_headers(auth_tokens))
+    res = client.post(f"/api/v1/results/{cl.json()['prediction_id']}/report", json={"language": "en"},
+                      headers=_headers(auth_tokens, "radiologist"))
+    assert res.status_code == 200
+    assert "path" not in res.json() and "/" not in res.json()["filename"]

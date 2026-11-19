@@ -28,25 +28,25 @@
 [tester]	WARNING	nosec encountered (B608), but no failed test on line 44
 [tester]	WARNING	nosec encountered (B608), but no failed test on line 51
 [tester]	WARNING	nosec encountered (B608), but no failed test on line 52
-Run started:2026-11-19 03:41:05.042361
+Run started:2026-11-19 04:10:09.245442
 
 Test results:
 	No issues identified.
 
 Code scanned:
-	Total lines of code: 5917
+	Total lines of code: 6120
 	Total lines skipped (#nosec): 0
 	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 5
 
 Run metrics:
 	Total issues (by severity):
 		Undefined: 0
-		Low: 15
+		Low: 19
 		Medium: 0
 		High: 0
 	Total issues (by confidence):
 		Undefined: 0
 		Low: 0
 		Medium: 3
-		High: 12
+		High: 16
 Files skipped (0):

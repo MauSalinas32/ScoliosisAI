@@ -296,6 +296,8 @@ def create_application() -> FastAPI:
         audit_service=audit_service,
     )
     app.include_router(router, prefix="/api/v1")
+    from api.error_handlers import register_exception_handlers
+    register_exception_handlers(app)
 
     # ── Step 8: Mount Frontend Web Application ─────────────────
     frontend_dir = Path(__file__).parent / "frontend"

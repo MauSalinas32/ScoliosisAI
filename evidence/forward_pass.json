@@ -1,0 +1,22 @@
+{
+  "model_version": "1.1.0",
+  "repeats": 50,
+  "cpu_threads": 0,
+  "model_predict": {
+    "mean_ms": 71.68,
+    "median_ms": 70.46,
+    "p95_ms": 84.37
+  },
+  "eager_call": {
+    "mean_ms": 143.33,
+    "median_ms": 142.89,
+    "p95_ms": 158.83
+  },
+  "tf_function": {
+    "mean_ms": 18.58,
+    "median_ms": 18.39,
+    "p95_ms": 22.76
+  },
+  "speedup_tf_function_vs_predict": 3.9,
+  "speedup_tf_function_vs_eager": 7.7
+}

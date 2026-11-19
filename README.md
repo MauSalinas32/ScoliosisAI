@@ -2,8 +2,8 @@
 
 [![CI/CD Pipeline](https://github.com/MauSalinas32/ScoliosisAI/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/MauSalinas32/ScoliosisAI/actions)
 [![Python Version](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-122%20passed-brightgreen.svg)]()
-[![Test Coverage](https://img.shields.io/badge/coverage-78%25-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-189%20passed-brightgreen.svg)]()
+[![Test Coverage](https://img.shields.io/badge/coverage-79%25-brightgreen.svg)]()
 [![Model Accuracy](https://img.shields.io/badge/accuracy-88.12%25-success.svg)]()
 [![Version](https://img.shields.io/badge/version-3.3.0-informational.svg)]()
 
@@ -66,14 +66,16 @@ Artifacts: [`models/scoliosis_classifier_v1.1.0/confusion_matrix.png`](models/sc
 |-- api/                          # FastAPI routes (RBAC, 2FA, upload, classify, review, reports, audit)
 |-- config/                       # Centralized settings
 |-- models/                       # Versioned model artefacts (v1.0.0 rejected, v1.1.0 approved)
-|-- scripts/                      # replica_test.sh, load_test.py, sample generator
+|-- scripts/                      # replica_test.sh, load_test.py, process_scaling.py, rbac_demo.py
+|-- evidence/                     # outputs of the test, benchmark, replica and RBAC runs
+|-- docs/                         # final deliverable (LaTeX source and PDF)
 |-- domain/                       # Entities and abstract contracts (DIP)
 |-- frontend/                     # Clinical web portal (HTML/CSS/JS, EN/ES)
 |-- infrastructure/               # Repositories, storage adapter, model registry
 |-- k8s/                          # Kubernetes manifests (kustomize)
 |-- pipeline/                     # Fail-fast preprocessing stages
 |-- services/                     # Auth, image mgmt, inference (Strategy/Decorator), clinical results, audit
-|-- tests/                        # 122 automated tests (unit, integration, security, profiling, system)
+|-- tests/                        # 189 automated tests (unit, integration, security, profiling, system)
 |-- utils/                        # Logging and exception hierarchy
 |-- Dockerfile / docker-compose.yml
 |-- requirements.txt / requirements-dev.txt
@@ -102,7 +104,7 @@ Default demo users (password `password123`): `radiologist`, `technician`, `admin
 ### Tests, evaluation and benchmark
 
 ```bash
-pytest -v --cov=services --cov=pipeline --cov=domain --cov=api --cov=infrastructure --cov=ai --cov-fail-under=75 tests/   # 122 tests
+pytest -v --cov=services --cov=pipeline --cov=domain --cov=api --cov=infrastructure --cov=ai --cov-fail-under=75 tests/   # 189 tests
 python ai/evaluate_model.py                       # recompute metrics on the test split
 python ai/plot_confusion_matrix.py                # confusion matrix chart
 python tests/profiling/benchmark_performance.py --iterations 20   # latency / throughput benchmark
@@ -111,6 +113,12 @@ IMAGE=<image> bash scripts/replica_test.sh        # PostgreSQL + 2 replicas + lo
 ```
 
 Mean end-to-end CPU latency is ~153 ms per radiograph (RNF-01 target: < 3 s).
+
+---
+
+## Documentation
+
+The final deliverable (Milestones 1 to 4) is [`docs/Entrega_Final_Hitos_1-4.pdf`](docs/Entrega_Final_Hitos_1-4.pdf); its LaTeX source is in [`docs/latex/`](docs/latex/). Every figure of the document comes from a file in [`evidence/`](evidence/) or [`models/`](models/).
 
 ---
 

@@ -1,0 +1,33 @@
+{
+  "cpu_count": 4,
+  "levels": [
+    {
+      "processes": 1,
+      "throughput_rps": 10.81,
+      "max_error_rate": 0.0,
+      "speedup": 1.0,
+      "efficiency_pct": 100
+    },
+    {
+      "processes": 2,
+      "throughput_rps": 21.7,
+      "max_error_rate": 0.0,
+      "speedup": 2.01,
+      "efficiency_pct": 100
+    },
+    {
+      "processes": 4,
+      "throughput_rps": 41.67,
+      "max_error_rate": 0.0,
+      "speedup": 3.85,
+      "efficiency_pct": 96
+    },
+    {
+      "processes": 6,
+      "throughput_rps": 41.06,
+      "max_error_rate": 0.0,
+      "speedup": 3.8,
+      "efficiency_pct": 63
+    }
+  ]
+}
