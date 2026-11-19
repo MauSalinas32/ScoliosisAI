@@ -1,0 +1,13 @@
+.git
+.github
+.venv
+venv
+__pycache__
+*.pyc
+data
+logs
+reports
+tests
+*.db
+.env
+k8s

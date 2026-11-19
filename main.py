@@ -14,9 +14,10 @@ Architecture: Modular Monolith with Dependency Inversion
   - Audit Service
 
 Team 3: Aguilar, Hernández, Gutiérrez, Salinas, Zepeda
-Software Engineering II — Milestone 3 (v3.2.0)
+Software Engineering II — Milestone 4 (v3.3.0)
 """
 
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -24,7 +25,7 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -158,16 +159,25 @@ def create_application() -> FastAPI:
         audit_repository=audit_repo,         # IAuditRepository
     )
 
-    # ── Step 4: Create default users ─────────────────────────
-    logger.info("Setting up default users...")
+    # ── Step 4: Create users ──────────────────────────────────
     from domain.interfaces.contracts import UserRole
-    default_users = [
-        ("radiologist", "password123", "Dr. Radiologist", UserRole.RADIOLOGIST),
-        ("technician", "password123", "Imaging Technician", UserRole.TECHNICIAN),
-        ("admin", "password123", "System Administrator", UserRole.ADMIN),
-        ("ml_engineer", "password123", "ML Engineer", UserRole.ML_ENGINEER),
-    ]
-    for username, password, full_name, role in default_users:
+    from config.settings import ENVIRONMENT
+    if ENVIRONMENT == "production":
+        # Production never ships demo accounts: only an administrator whose password comes from the secret store.
+        initial_password = os.getenv("INITIAL_ADMIN_PASSWORD", "")
+        initial_users = [("admin", initial_password, "System Administrator", UserRole.ADMIN)] if initial_password else []
+        if not initial_users:
+            logger.warning("No INITIAL_ADMIN_PASSWORD set: no user was created (production)")
+    else:
+        demo_password = os.getenv("DEFAULT_USERS_PASSWORD", "password123")
+        logger.info("Development mode: creating demo users")
+        initial_users = [
+            ("radiologist", demo_password, "Dr. Radiologist", UserRole.RADIOLOGIST),
+            ("technician", demo_password, "Imaging Technician", UserRole.TECHNICIAN),
+            ("admin", demo_password, "System Administrator", UserRole.ADMIN),
+            ("ml_engineer", demo_password, "ML Engineer", UserRole.ML_ENGINEER),
+        ]
+    for username, password, full_name, role in initial_users:
         try:
             auth_service.register_user(username, password, full_name, role)
             logger.info(f"  Created user: {username} ({role.value})")
@@ -256,13 +266,24 @@ def create_application() -> FastAPI:
         return HTMLResponse(custom_html)
 
     # CORS middleware
+    from config.settings import CORS_ALLOWED_ORIGINS
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_origins=CORS_ALLOWED_ORIGINS,
+        allow_credentials=CORS_ALLOWED_ORIGINS != ["*"],   # credentials are never combined with a wildcard origin
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type"],
     )
+
+    @app.middleware("http")
+    async def security_headers(request, call_next):
+        response = await call_next(request)
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "no-referrer")
+        if request.url.path.startswith("/api/"):
+            response.headers.setdefault("Cache-Control", "no-store")   # clinical data must not be cached by browsers/proxies
+        return response
 
     # ── Step 7: Register API Routes ───────────────────────────
     from api.routes import create_router
@@ -275,6 +296,8 @@ def create_application() -> FastAPI:
         audit_service=audit_service,
     )
     app.include_router(router, prefix="/api/v1")
+    from api.error_handlers import register_exception_handlers
+    register_exception_handlers(app)
 
     # ── Step 8: Mount Frontend Web Application ─────────────────
     frontend_dir = Path(__file__).parent / "frontend"

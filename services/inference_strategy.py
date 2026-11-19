@@ -28,7 +28,7 @@ from domain.interfaces.contracts import IMLStrategy
 from config.settings import CLASS_LABELS, CONFIDENCE_THRESHOLD, TARGET_IMAGE_SIZE
 from ai.transfer_learning import estimate_vertebrae_from_image
 from utils.logger import get_logger
-from utils.exceptions import ModelNotLoadedError
+from utils.exceptions import InvalidModelInputError, ModelNotLoadedError
 
 logger = get_logger("Strategy")
 
@@ -71,6 +71,26 @@ class ScoliosisStrategy(IMLStrategy):
             logger.error(f"Failed to load model from {model_path}: {e}")
             raise
 
+    @staticmethod
+    def validate_input(batch: np.ndarray) -> np.ndarray:
+        """Enforce the model input contract: float32-compatible (N, 224, 224, 3) with values in [0, 1]."""
+        arr = np.asarray(batch, dtype=np.float32)
+        expected = (*TARGET_IMAGE_SIZE, 3)
+        if arr.ndim != 4 or tuple(arr.shape[1:]) != expected:
+            raise InvalidModelInputError(f"expected shape (N, {expected[0]}, {expected[1]}, {expected[2]}), got {arr.shape}")
+        if not np.isfinite(arr).all():
+            raise InvalidModelInputError("contains NaN or infinite values")
+        low, high = float(arr.min()), float(arr.max())
+        if low < -1e-6 or high > 1.0 + 1e-6:
+            raise InvalidModelInputError(f"values must be in [0, 1], got [{low:.3f}, {high:.3f}] (was the image divided by 255?)")
+        return arr
+
+    def predict_probabilities(self, batch: np.ndarray) -> np.ndarray:
+        """Softmax probabilities for a batch (used by the input-sensitivity probe)."""
+        if self._model is None:
+            raise ModelNotLoadedError("No approved Keras model is loaded in ScoliosisStrategy.")
+        return np.asarray(self._forward(self.validate_input(batch)).numpy(), dtype=np.float32)
+
     def classify(
         self,
         preprocessed_image: np.ndarray,
@@ -92,10 +112,10 @@ class ScoliosisStrategy(IMLStrategy):
             )
 
         tensor = np.asarray(preprocessed_image, dtype=np.float32)
-        if not np.all(np.isfinite(tensor)):
-            tensor = np.nan_to_num(tensor, nan=0.0, posinf=1.0, neginf=0.0).astype(np.float32)
         if tensor.ndim == 3:
             tensor = np.expand_dims(tensor, axis=0)
+        # Reject (never silently repair) anything outside the input contract
+        tensor = self.validate_input(tensor)
 
         # Step 1: Compiled CNN forward pass -> true softmax probabilities (thread-safe under flood)
         with self._lock:

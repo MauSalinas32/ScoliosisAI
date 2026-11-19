@@ -5,3 +5,6 @@ metadata:
   labels:
     app.kubernetes.io/name: medical-ai-system
     app.kubernetes.io/environment: production
+    # Pod Security Admission: violations of the "restricted" profile are reported (warn + audit), not blocked
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/audit: restricted

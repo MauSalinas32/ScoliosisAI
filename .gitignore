@@ -1,0 +1,23 @@
+# Runtime state (never commit patient data, databases, uploads or generated reports)
+data/
+logs/
+*.db
+*.sqlite3
+reports/
+# Secrets
+.env
+k8s/secret.yaml
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.coverage
+coverage.xml
+test-results.xml
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

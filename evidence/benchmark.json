@@ -1,0 +1,62 @@
+{
+  "benchmark_environment": {
+    "iterations": 30,
+    "total_duration_seconds": 2.31,
+    "throughput_requests_per_second": 13.0,
+    "ram_baseline_mb": 771.06,
+    "ram_peak_mb": 788.44,
+    "ram_growth_mb": 17.38
+  },
+  "latency_stages": {
+    "end_to_end": {
+      "mean_ms": 76.92,
+      "median_ms": 69.2,
+      "p95_ms": 100.74,
+      "p99_ms": 159.99,
+      "min_ms": 64.26,
+      "max_ms": 183.12
+    },
+    "preprocessing": {
+      "mean_ms": 39.19,
+      "median_ms": 36.92,
+      "p95_ms": 52.07,
+      "p99_ms": 58.1,
+      "min_ms": 34.05,
+      "max_ms": 60.01
+    },
+    "inference": {
+      "mean_ms": 23.54,
+      "median_ms": 23.02,
+      "p95_ms": 27.89,
+      "p99_ms": 29.1,
+      "min_ms": 19.47,
+      "max_ms": 29.59
+    },
+    "report_generation": {
+      "mean_ms": 13.01,
+      "median_ms": 8.59,
+      "p95_ms": 18.63,
+      "p99_ms": 85.25,
+      "min_ms": 7.68,
+      "max_ms": 111.96
+    },
+    "audit_logging": {
+      "mean_ms": 0.6,
+      "median_ms": 0.51,
+      "p95_ms": 1.14,
+      "p99_ms": 1.53,
+      "min_ms": 0.41,
+      "max_ms": 1.6
+    }
+  },
+  "bottleneck_breakdown": {
+    "preprocessing_pct": 51.34,
+    "inference_pct": 30.84,
+    "report_generation_pct": 17.04,
+    "audit_database_pct": 0.79
+  },
+  "conclusions": {
+    "primary_bottleneck": "Image preprocessing (decode, validation, quality checks)",
+    "note": "Single-process, sequential measurement on the machine that ran it; see evidence/replica_test.txt for the multi-replica measurement."
+  }
+}

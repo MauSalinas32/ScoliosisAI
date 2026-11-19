@@ -39,10 +39,8 @@ class TestApiIntegration:
         login_data = login_res.json()
         assert login_data.get("status") == "2fa_required"
 
-        # Before 2FA is verified, using the token on a protected endpoint must fail (401)
-        unverified_headers = {"Authorization": f"Bearer {login_data['access_token']}"}
-        blocked_res = client.get("/api/v1/auth/me", headers=unverified_headers)
-        assert blocked_res.status_code == 401
+        # No token may exist before the 2FA code is verified
+        assert "access_token" not in login_data
 
         assert "radiologist" in _2fa_codes
         code = _2fa_codes["radiologist"]["code"]
@@ -53,6 +51,7 @@ class TestApiIntegration:
         )
         assert v2fa_res.status_code == 200
         assert v2fa_res.json()["status"] == "verified"
+        assert v2fa_res.json()["access_token"]
 
     def test_wrong_2fa_code_rejected(self, client: TestClient):
         """3. Test that submitting an invalid 2FA code returns 401 Unauthorized."""

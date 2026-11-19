@@ -27,6 +27,14 @@ spec:
         fsGroup: 10001
         seccompProfile:
           type: RuntimeDefault
+      # Prefer different nodes for the replicas; on a single node (kind) they still schedule
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: medical-ai-app
       containers:
         - name: medical-ai-backend
           image: ghcr.io/medical-ai/scoliosis-diagnosis-system:1.1.0

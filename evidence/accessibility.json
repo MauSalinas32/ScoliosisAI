@@ -1,0 +1,58 @@
+{
+  "rules": [
+    "wcag2a",
+    "wcag2aa",
+    "wcag21a",
+    "wcag21aa"
+  ],
+  "keyboard": {
+    "login_with_keyboard_only": true,
+    "navigation": {
+      "nav-img": {
+        "focusable_by_tab": true,
+        "activated_with_enter": true
+      },
+      "nav-ai": {
+        "focusable_by_tab": true,
+        "activated_with_enter": true
+      },
+      "nav-results": {
+        "focusable_by_tab": true,
+        "activated_with_enter": true
+      }
+    }
+  },
+  "summary": {},
+  "per_page": [
+    {
+      "page": "login",
+      "violations": [],
+      "passes": 23
+    },
+    {
+      "page": "2fa",
+      "violations": [],
+      "passes": 22
+    },
+    {
+      "page": "results (radiologist)",
+      "violations": [],
+      "passes": 24
+    },
+    {
+      "page": "ai tab (radiologist)",
+      "violations": [],
+      "passes": 22
+    },
+    {
+      "page": "upload (technician)",
+      "violations": [],
+      "passes": 25
+    },
+    {
+      "page": "audit (admin)",
+      "violations": [],
+      "passes": 25
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+
+== A. Start 2 replicas at the same time on an empty database
+replica 1: /health=200 /ready=200
+replica 2: /health=200 /ready=200
+tracebacks at start-up: replica1=0 replica2=0
+
+== B. 2FA code issued by replica 1, verified on replica 2
+2fa_required
+verify on replica 2 -> status=verified
+
+== C. Upload through replica 1, classify through replica 2
+upload@replica1=200  classify@replica2=200  classification=NO SCOLIOSIS
+
+== D. Throughput (POST /classify, 1024x1024 image, same client)
+--- 1 replica (direct), 4 concurrent clients
+9.99 req/s {'mean': 397.7, 'p50': 393.7, 'p95': 465.1, 'p99': 468.6, 'max': 470.8} errors 0.0
+--- 2 replicas behind nginx, 8 concurrent clients (4 per replica)
+19.44 req/s {'mean': 407.3, 'p50': 400.1, 'p95': 609.5, 'p99': 663.1, 'max': 676.9} errors 0.0
+speed-up with 2 replicas = 1.95x (ideal 2.00x) -> scaling efficiency 97%
+
+== E. Availability: stop replica 2, keep sending requests through the balancer
+20 requests via balancer with one replica down: 20 x 200

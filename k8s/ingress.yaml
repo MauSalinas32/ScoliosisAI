@@ -6,6 +6,9 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "16m"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # throttle brute-force attempts against /auth/login (per client IP)
+    nginx.ingress.kubernetes.io/limit-rps: "10"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "3"
 spec:
   ingressClassName: nginx
   rules:

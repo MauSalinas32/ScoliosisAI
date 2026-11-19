@@ -23,7 +23,8 @@ from domain.interfaces.contracts import (
 from services.model_factory import ModelFactory
 from services.inference_strategy import ScoliosisStrategy
 from infrastructure.model_registry import ModelRegistry
-from config.settings import DEFAULT_MODEL_NAME, ALLOW_UNAPPROVED_MODEL
+from ai.model_probe import probe_probabilities
+from config.settings import CLASS_LABELS, DEFAULT_MODEL_NAME, ALLOW_UNAPPROVED_MODEL
 from utils.logger import get_logger
 from utils.exceptions import InferenceError, ModelNotLoadedError
 
@@ -75,7 +76,9 @@ class InferenceService:
 
         active_version = self._registry.get_active_version(model_name)
         if not active_version and self._auto_bootstrap:
-            active_version = self._registry.bootstrap_packaged_models(model_name)
+            self._registry.bootstrap_packaged_models(model_name)
+            # re-read: the object returned by the bootstrap predates approve/activate and looks unapproved
+            active_version = self._registry.get_active_version(model_name)
 
         if active_version and active_version.is_approved and Path(active_version.file_path).exists():
             strategy = self._strategy_factory()
@@ -85,6 +88,20 @@ class InferenceService:
                 model_version=active_version.version,
                 model_path=active_version.file_path,
             )
+            probe = self._run_probe(strategy)
+            if probe and probe["input_insensitive"]:
+                # "approved" is only a database / JSON value: never serve a model whose output
+                # does not react to its input, whatever its metadata claims.
+                self._inferencer = None
+                self._is_approved = False
+                reason = (
+                    f"Model {active_version.model_name} v{active_version.version} failed the input-sensitivity "
+                    f"probe (trimmed probability range {probe['max_probability_range']} < "
+                    f"{probe['min_required_range']}); refusing to serve it."
+                )
+                logger.error(reason)
+                return {"status": "not_ready", "model_name": model_name, "version": None,
+                        "is_approved": False, "note": reason, "probe": probe}
             self._current_model_name = active_version.model_name
             self._current_model_version = active_version.version
             self._is_approved = True
@@ -118,6 +135,14 @@ class InferenceService:
             "is_approved": False,
             "note": "No approved model available in Model Registry.",
         }
+
+    @staticmethod
+    def _run_probe(strategy) -> Optional[Dict]:
+        """Input-sensitivity probe; skipped for strategies that cannot expose probabilities."""
+        predict = getattr(strategy, "predict_probabilities", None)
+        if predict is None:
+            return None
+        return probe_probabilities(predict, [CLASS_LABELS[i] for i in range(len(CLASS_LABELS))])
 
     def classify(
         self,

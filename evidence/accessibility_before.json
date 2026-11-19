@@ -1,0 +1,123 @@
+{
+  "rules": [
+    "wcag2a",
+    "wcag2aa",
+    "wcag21a",
+    "wcag21aa"
+  ],
+  "keyboard": {
+    "login_with_keyboard_only": true,
+    "navigation": {
+      "nav-img": {
+        "focusable_by_tab": false,
+        "activated_with_enter": true
+      },
+      "nav-ai": {
+        "focusable_by_tab": false,
+        "activated_with_enter": false
+      },
+      "nav-results": {
+        "focusable_by_tab": false,
+        "activated_with_enter": false
+      }
+    }
+  },
+  "summary": {
+    "color-contrast": {
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "pages": [
+        "login",
+        "results (radiologist)",
+        "ai tab (radiologist)",
+        "upload (technician)",
+        "audit (admin)"
+      ],
+      "nodes": 7
+    }
+  },
+  "per_page": [
+    {
+      "page": "login",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 1,
+          "targets": [
+            "#link-forgot-pass"
+          ]
+        }
+      ],
+      "passes": 14
+    },
+    {
+      "page": "2fa",
+      "violations": [],
+      "passes": 14
+    },
+    {
+      "page": "results (radiologist)",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 2,
+          "targets": [
+            "#btn-sign-out",
+            "#file-name"
+          ]
+        }
+      ],
+      "passes": 13
+    },
+    {
+      "page": "ai tab (radiologist)",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 1,
+          "targets": [
+            "#btn-sign-out"
+          ]
+        }
+      ],
+      "passes": 13
+    },
+    {
+      "page": "upload (technician)",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 2,
+          "targets": [
+            "#btn-sign-out",
+            "#file-name"
+          ]
+        }
+      ],
+      "passes": 13
+    },
+    {
+      "page": "audit (admin)",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 1,
+          "targets": [
+            "#btn-sign-out"
+          ]
+        }
+      ],
+      "passes": 15
+    }
+  ]
+}

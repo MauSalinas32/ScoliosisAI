@@ -41,13 +41,13 @@ logger = get_logger("PerformanceBenchmark")
 def generate_benchmark_image(width=1024, height=1024) -> bytes:
     """Generate synthetic realistic 3-channel X-ray image bytes."""
     arr = np.random.randint(40, 220, (height, width, 3), dtype=np.uint8)
-    img = Image.fromarray(arr, mode="RGB")
+    img = Image.fromarray(arr)
     buf = io.BytesIO()
     img.save(buf, format="JPEG", quality=90)
     return buf.getvalue()
 
 
-def run_benchmark(iterations: int = 15):
+def run_benchmark(iterations: int = 15, output: str = ""):
     logger.info("=" * 70)
     logger.info("  Performance, Latency & Scalability Benchmark — Milestone 3")
     logger.info(f"  Iterations: {iterations}")
@@ -59,8 +59,8 @@ def run_benchmark(iterations: int = 15):
     audit_repo = AuditRepository()
     image_repo = ImageRepository()
     result_repo = ResultRepository()
-    user_repo = UserRepository()
-    storage = LocalStorageAdapter()
+    UserRepository()
+    LocalStorageAdapter()
     model_registry = ModelRegistry()
 
     preprocessing_service = PreprocessingService(audit_repository=audit_repo)
@@ -153,7 +153,7 @@ def run_benchmark(iterations: int = 15):
             curve_type=inf_result.get("curve_type"),
             curve_detail=inf_result.get("curve_detail"),
         )
-        pdf_path = clinical_service.generate_report(
+        clinical_service.generate_report(
             result_id=saved_pred.id,
             reviewer_name="Dr. Benchmark Radiologist",
             language="es",
@@ -224,18 +224,18 @@ def run_benchmark(iterations: int = 15):
         },
         "bottleneck_breakdown": bottleneck_breakdown,
         "conclusions": {
-            "primary_bottleneck": "Deep Learning Inference (MobileNetV2 CNN forward pass)",
-            "bottleneck_rationale": f"Inference accounts for {bottleneck_breakdown['inference_pct']}% of total latency per request.",
-            "optimization_strategies": [
-                "TensorRT / ONNX Runtime quantization (FP32 to INT8/FP16) reducing inference latency by ~3x.",
-                "Batch prediction queue for non-emergency radiograph processing.",
-                "Horizontal Pod Autoscaling (HPA) in Kubernetes scaling pods based on CPU utilization > 70%.",
-                "Asynchronous Celery/Redis background task for PDF report rendering to decouple HTTP response."
-            ]
+            # derived from the measurement, not hard-coded
+            "primary_bottleneck": max(
+                {"Image preprocessing (decode, validation, quality checks)": bottleneck_breakdown["preprocessing_pct"],
+                 "CNN inference (MobileNetV2 forward pass)": bottleneck_breakdown["inference_pct"],
+                 "PDF report generation": bottleneck_breakdown["report_generation_pct"],
+                 "Audit database write": bottleneck_breakdown["audit_database_pct"]}.items(),
+                key=lambda kv: kv[1])[0],
+            "note": "Single-process, sequential measurement on the machine that ran it; see evidence/replica_test.txt for the multi-replica measurement.",
         }
     }
 
-    output_file = Path(__file__).parent.parent.parent / "data" / "performance_benchmark_results.json"
+    output_file = Path(output) if output else Path(__file__).parent.parent.parent / "data" / "performance_benchmark_results.json"
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
 
@@ -262,4 +262,9 @@ def run_benchmark(iterations: int = 15):
 
 
 if __name__ == "__main__":
-    run_benchmark(iterations=15)
+    import argparse
+    parser = argparse.ArgumentParser(description="End-to-end latency benchmark (real model, real pipeline)")
+    parser.add_argument("--iterations", type=int, default=15)
+    parser.add_argument("--output", default="", help="JSON file to write (default: data/performance_benchmark_results.json)")
+    cli = parser.parse_args()
+    run_benchmark(iterations=cli.iterations, output=cli.output)

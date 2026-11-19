@@ -4,7 +4,6 @@ namespace: medical-system
 resources:
   - namespace.yaml
   - configmap.yaml
-  - secret.example.yaml
   - postgres.yaml
   - pvc.yaml
   - deployment.yaml

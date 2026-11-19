@@ -26,6 +26,7 @@ from sqlalchemy import (
     DateTime,
     Text,
     event,
+    text,
 )
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -143,6 +144,27 @@ class AuditEntryDB(Base):
     details = Column(Text, nullable=False)
     timestamp = Column(DateTime, default=datetime.utcnow, index=True)
     ip_address = Column(String(50), nullable=True)
+    # Tamper evidence: each entry stores the hash of the previous one (hash chain)
+    prev_hash = Column(String(64), nullable=True)
+    entry_hash = Column(String(64), nullable=True)
+
+
+class RevokedTokenDB(Base):
+    """JWTs revoked before their expiry (logout). Rows can be purged once expired."""
+    __tablename__ = "revoked_tokens"
+
+    jti = Column(String(64), primary_key=True)
+    expires_at = Column(DateTime, nullable=False, index=True)
+    revoked_at = Column(DateTime, default=datetime.utcnow)
+
+
+class LoginFailureDB(Base):
+    """Failed password attempts per username (shared by every replica) for lockout."""
+    __tablename__ = "login_failures"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(64), nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
 
 class OneTimeCodeDB(Base):
@@ -178,8 +200,13 @@ class ModelVersionDB(Base):
     description = Column(Text, nullable=True)
 
 
-def init_database():
-    """Create all tables if they don't exist and ensure schema migrations."""
+# Arbitrary constant shared by every replica: identifies the schema-creation advisory lock in PostgreSQL
+_SCHEMA_LOCK_KEY = 727274
+_AUDIT_LOCK_KEY = 727275  # serialises audit appends so the hash chain cannot fork between replicas
+
+
+def _create_schema():
+    """Create all tables and apply additive migrations (idempotent)."""
     Base.metadata.create_all(bind=engine)
     if _is_sqlite:
         try:
@@ -193,6 +220,12 @@ def init_database():
                     cursor.execute("ALTER TABLE prediction_results ADD COLUMN curve_type VARCHAR(100)")
                 if "curve_detail" not in columns:
                     cursor.execute("ALTER TABLE prediction_results ADD COLUMN curve_detail TEXT")
+                cursor.execute("PRAGMA table_info(audit_log)")
+                audit_columns = [row[1] for row in cursor.fetchall()]
+                if "prev_hash" not in audit_columns:
+                    cursor.execute("ALTER TABLE audit_log ADD COLUMN prev_hash VARCHAR(64)")
+                if "entry_hash" not in audit_columns:
+                    cursor.execute("ALTER TABLE audit_log ADD COLUMN entry_hash VARCHAR(64)")
                 conn.connection.commit()
         except Exception:
             pass
@@ -205,3 +238,24 @@ def get_db_session():
         yield session
     finally:
         session.close()
+
+
+def init_database():
+    """
+    Create all tables if they don't exist and apply additive schema migrations.
+
+    Safe to call from several replicas at the same time: on PostgreSQL a session-level advisory
+    lock serialises the schema work. Without it, two pods starting together on an empty database
+    both try to CREATE TABLE and one of them crashes with a unique violation (CrashLoopBackOff on
+    the first Kubernetes deployment; reproduced with scripts/replica_test.sh).
+    """
+    if _is_sqlite:
+        _create_schema()
+        return
+    with engine.connect() as lock_conn:
+        lock_conn.execute(text("SELECT pg_advisory_lock(:key)"), {"key": _SCHEMA_LOCK_KEY})
+        try:
+            _create_schema()
+        finally:
+            lock_conn.execute(text("SELECT pg_advisory_unlock(:key)"), {"key": _SCHEMA_LOCK_KEY})
+            lock_conn.commit()

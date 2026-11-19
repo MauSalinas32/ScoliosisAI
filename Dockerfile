@@ -23,7 +23,7 @@ COPY requirements.txt .
 
 # Install dependencies into isolated wheels directory
 RUN pip install --upgrade pip && \
-    pip wheel --no-cache-dir --no-deps --wheel-dir /build/wheels -r requirements.txt
+    pip wheel --no-cache-dir --wheel-dir /build/wheels -r requirements.txt
 
 # ------------------------------------------------------------------------------
 # Stage 2: Final Runtime Image
@@ -32,7 +32,7 @@ FROM python:3.11-slim AS runner
 
 # Metadata labels
 LABEL maintainer="Equipo 3 - Software Engineering II" \
-      version="3.2.0" \
+      version="3.3.0" \
       description="Medical Image Classification System with Transfer Learning & Vertebral Tracking"
 
 WORKDIR /app
@@ -45,16 +45,15 @@ RUN apt-get update && apt-get upgrade -y --no-install-recommends && \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy built wheels from builder stage
-COPY --from=builder /build/wheels /wheels
-COPY --from=builder /build/requirements.txt .
-
-# Upgrade core packaging tools to patch CVEs and install wheels without compiler overhead
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir /wheels/* && rm -rf /wheels
+# Install the wheels built in stage 1. They are bind-mounted (not COPY'd) so the ~2 GB of wheels
+# never become an image layer; only the installed packages remain.
+COPY requirements.txt .
+RUN --mount=type=bind,from=builder,source=/build/wheels,target=/wheels \
+    pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.txt
 
 # Create dedicated non-root application user for clinical data security compliance
-RUN groupadd -r medicalgroup && useradd -r -g medicalgroup -d /app medicaluser
+# Numeric UID/GID 10001: identical to the Kubernetes securityContext (runAsUser/fsGroup) so volume ownership matches
+RUN groupadd --gid 10001 medicalgroup && useradd --uid 10001 --gid 10001 --no-create-home --home-dir /app --shell /usr/sbin/nologin medicaluser
 
 # Copy application source code
 COPY . /app/
@@ -64,7 +63,7 @@ RUN mkdir -p /app/data/uploads /app/data/processed /app/data/models /app/data/re
     chown -R medicaluser:medicalgroup /app
 
 # Switch to non-root user
-USER medicaluser
+USER 10001:10001
 
 # Expose internal API service port
 EXPOSE 8000
@@ -73,5 +72,6 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Launch production server via Uvicorn with standard ASGI workers
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+# One worker per container: TensorFlow already uses the pod's cores for one forward pass and every worker would
+# load its own copy of the model (about 0.8 GB). Capacity grows with replicas (HPA), not with workers.
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

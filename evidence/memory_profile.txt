@@ -1,0 +1,4 @@
+[Memory Profile - 1024x1024 Preprocessing (int16/float32)] Peak Memory: 26.08 MB, Retained Memory: 3.59 MB
+[Memory Profile - 30 Decorated Inferences Leak Check] Total Growth: 7.32 KB
+[Memory Profile - 50 Real TF Inferences RSS Drift] Before: 803.4 MB | After: 805.7 MB | Drift: 2.34 MB
+[Memory Profile - Fail-Fast Rejection] Peak Memory: 71.92 KB

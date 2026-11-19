@@ -6,7 +6,7 @@ Manages prediction results, clinical review, history, and report generation.
 
 from datetime import datetime, timezone
 import zoneinfo
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from domain.interfaces.contracts import (
     IResultRepository,

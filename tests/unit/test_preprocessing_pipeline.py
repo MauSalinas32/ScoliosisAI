@@ -231,3 +231,45 @@ class TestPreprocessingPipelineUnit:
         result = svc.preprocess(image_array=raw_arr, image_id=1, filename="test.jpg", user_id=1)
         assert "preprocessed_image" in result
         assert result["preprocessed_image"].shape == (1, 224, 224, 3)
+
+
+class TestDicomIdentifiersNeverReachTheDisk:
+    """LFPDPPP / NOM-024: the stored DICOM file must not contain the patient's direct identifiers."""
+
+    def test_stored_dicom_is_scrubbed(self):
+        import io
+        import numpy as np
+        import pydicom
+        from pydicom.dataset import FileDataset, FileMetaDataset
+        from pydicom.uid import ExplicitVRLittleEndian, generate_uid
+        from pipeline.stages import anonymize_dicom_bytes
+
+        meta = FileMetaDataset()
+        meta.MediaStorageSOPClassUID = "1.2.840.10008.5.1.4.1.1.1"
+        meta.MediaStorageSOPInstanceUID = generate_uid()
+        meta.TransferSyntaxUID = ExplicitVRLittleEndian
+        ds = FileDataset(None, {}, file_meta=meta, preamble=b"\0" * 128)
+        ds.PatientName = "PEREZ^JUAN"
+        ds.PatientID = "CURP123456"
+        ds.PatientBirthDate = "19800101"
+        ds.InstitutionName = "Hospital General"
+        ds.StudyDate = "20260101"
+        ds.Rows = ds.Columns = 64
+        ds.SamplesPerPixel = 1
+        ds.PhotometricInterpretation = "MONOCHROME2"
+        ds.BitsAllocated = 16
+        ds.BitsStored = 16
+        ds.HighBit = 15
+        ds.PixelRepresentation = 0
+        ds.PixelData = (np.arange(64 * 64, dtype=np.uint16)).tobytes()
+        ds.is_little_endian = True
+        ds.is_implicit_VR = False
+        buf = io.BytesIO()
+        pydicom.dcmwrite(buf, ds)
+
+        scrubbed = anonymize_dicom_bytes(buf.getvalue())
+        for secret in (b"PEREZ", b"JUAN", b"CURP123456", b"19800101", b"Hospital General"):
+            assert secret not in scrubbed
+        again = pydicom.dcmread(io.BytesIO(scrubbed))
+        assert again.pixel_array.shape == (64, 64)          # the image itself is intact
+        assert again.PatientIdentityRemoved == "YES"

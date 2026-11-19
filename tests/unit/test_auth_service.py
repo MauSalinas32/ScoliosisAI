@@ -188,6 +188,6 @@ class TestAuthServiceUnit:
         auth_service.update_password("test_doc_unit", "password123")
 
     def test_password_too_short_rejected(self, auth_service: AuthService):
-        """Verify passwords shorter than 6 characters are rejected."""
-        with pytest.raises(AuthenticationError, match="at least 6 characters"):
+        """Verify passwords shorter than the minimum (8 characters) are rejected."""
+        with pytest.raises(AuthenticationError, match="at least 8 characters"):
             auth_service.update_password("test_doc_unit", "123")

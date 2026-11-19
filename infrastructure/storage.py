@@ -12,12 +12,11 @@ Handles the physical storage of:
   - Generated clinical reports
 """
 
-import shutil
 from pathlib import Path
 from typing import Optional
 
 from domain.interfaces.contracts import IStorageAdapter
-from config.settings import UPLOAD_DIR, PROCESSED_DIR, REPORTS_DIR
+from config.settings import UPLOAD_DIR
 from utils.logger import get_logger
 from utils.exceptions import RepositoryError
 

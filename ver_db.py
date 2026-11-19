@@ -41,15 +41,15 @@ def limpiar_artefactos_prueba():
     )
     ph = ",".join(["?"] * len(test_names))
     cur.execute(
-        f"SELECT id FROM medical_images WHERE filename IN ({ph}) "
+        f"SELECT id FROM medical_images WHERE filename IN ({ph}) "  # nosec B608 - only "?" placeholders are interpolated
         f"OR filename LIKE 'qwertyuiop%' OR filename LIKE 'bench_%'",
         test_names,
     )
     test_ids = [r[0] for r in cur.fetchall()]
     if test_ids:
         id_ph = ",".join(["?"] * len(test_ids))
-        cur.execute(f"DELETE FROM prediction_results WHERE image_id IN ({id_ph})", test_ids)
-        cur.execute(f"DELETE FROM medical_images WHERE id IN ({id_ph})", test_ids)
+        cur.execute(f"DELETE FROM prediction_results WHERE image_id IN ({id_ph})", test_ids)  # nosec B608 - only "?" placeholders
+        cur.execute(f"DELETE FROM medical_images WHERE id IN ({id_ph})", test_ids)  # nosec B608 - only "?" placeholders
 
     # Eliminar predicciones mock de pruebas unitarias (image_id=99 o sin imagen asociada)
     cur.execute("DELETE FROM prediction_results WHERE image_id = 99 OR image_id NOT IN (SELECT id FROM medical_images)")
@@ -130,7 +130,7 @@ def mostrar_resumen():
 
     print("\n[+] Tablas disponibles y conteo de registros:")
     for tbl in tables:
-        cursor.execute(f"SELECT COUNT(*) as total FROM {tbl}")
+        cursor.execute(f"SELECT COUNT(*) as total FROM {tbl}")  # nosec B608 - table names come from sqlite_master
         cnt = cursor.fetchone()["total"]
         print(f"   * {tbl:<22} : {cnt} registros")
 

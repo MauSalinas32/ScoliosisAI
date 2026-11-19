@@ -282,6 +282,10 @@ class IAuditRepository(ABC):
     ) -> List[AuditEntry]:
         ...
 
+    def verify_integrity(self) -> dict:
+        """Check the tamper-evidence (hash chain) of the stored entries; optional for simple implementations."""
+        raise NotImplementedError("This audit repository does not support integrity verification")
+
 
 # ═══════════════════════════════════════════════════════════════
 # Interfaces — Services

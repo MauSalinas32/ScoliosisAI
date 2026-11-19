@@ -69,6 +69,14 @@ class AuthenticationError(MedicalSystemError):
         super().__init__(message, error_code="AUTH_ERROR")
 
 
+class AccountLockedError(AuthenticationError):
+    """Raised when too many failed password attempts were made for a username (HTTP 429)."""
+
+    def __init__(self, minutes: int):
+        super().__init__(f"Too many failed login attempts. Try again in {minutes} minutes.")
+        self.error_code = "ACCOUNT_LOCKED"
+
+
 class OneTimeCodeError(AuthenticationError):
     """Raised when a 2FA or password recovery one-time code is invalid, expired, or locked."""
 
@@ -111,6 +119,18 @@ class ModelNotLoadedError(InferenceError):
     def __init__(self, message: str = "No trained and approved model is loaded in the Inference Service"):
         super().__init__(message)
         self.error_code = "MODEL_NOT_LOADED"
+
+
+class InvalidModelInputError(InferenceError):
+    """Raised when the tensor given to the model violates the input contract (shape / range [0, 1]).
+
+    The network rescales [0, 1] to [-1, 1] internally; feeding [0, 255] values (or any other
+    range) silently produces meaningless probabilities, so it is rejected before inference.
+    """
+
+    def __init__(self, reason: str):
+        super().__init__(f"Invalid model input: {reason}")
+        self.error_code = "INVALID_MODEL_INPUT"
 
 
 class ModelLoadError(InferenceError):
