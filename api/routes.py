@@ -193,25 +193,26 @@ def create_router(
     ):
         """
         Register a new user account (RF-01).
-        Anonymous self-registration is restricted to non-admin clinical staff;
-        creating an 'admin' account requires an authenticated Administrator token.
+        Anonymous self-registration is limited to the 'technician' role; creating any other
+        account (radiologist, ML engineer, admin) requires an authenticated Administrator token.
         """
         try:
             role = UserRole(request.role)
         except ValueError:
             raise HTTPException(status_code=400, detail=f"Invalid role '{request.role}'")
 
-        if role == UserRole.ADMIN:
+        if role != UserRole.TECHNICIAN:
+            # Only the lowest-privilege role can be self-registered; every other role needs an administrator token
             caller = _authenticate_and_authorize(
                 authorization,
                 allowed_roles=[UserRole.ADMIN],
-                action_name="register_admin_account",
+                action_name="register_privileged_account",
                 require_token=False,
             )
             if not caller:
                 raise HTTPException(
                     status_code=403,
-                    detail="Role 'anonymous' is not authorized to self-register as 'admin'. Administrator token required.",
+                    detail=f"Role 'anonymous' is not authorized to create a '{role.value}' account. Administrator token required.",
                 )
 
         try:

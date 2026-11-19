@@ -13,6 +13,7 @@ Corrections found by auditing the 3.2.0 code against the Milestone 3 feedback (e
   - `SECRET_KEY` has no public default: with `ENVIRONMENT=production` the service refuses to start with a missing, default or short (< 32 chars) key. The hard-coded key was removed from `docker-compose.yml` and `k8s/secret.yaml`.
   - Demo users (`password123`) are created only outside production; in production only `admin` is created from `INITIAL_ADMIN_PASSWORD`.
   - `/auth/forgot-password` answers identically for existing and unknown users (no account enumeration).
+  - **Self-registration cannot escalate the role:** anyone could register as radiologist (the default option of the form) or ML engineer and then confirm diagnoses or read the audit trail. Anonymous registration is now limited to the technician role; any other role needs an administrator token (`TestSelfRegistrationCannotEscalateRole`).
   - **Only the radiologist can confirm or correct a diagnosis** (server returns 403 to technician, administrator and ML engineer; the UI hides the buttons accordingly).
 - **Model robustness**
   - `ScoliosisStrategy.validate_input` rejects tensors outside `[0, 1]`, with the wrong shape, or with NaN/Inf (`HTTP 422`) instead of silently repairing them: feeding `[0, 255]` values used to return "S-curve, 100 %".
@@ -30,7 +31,7 @@ Corrections found by auditing the 3.2.0 code against the Milestone 3 feedback (e
   - Docker image: numeric UID/GID 10001 (matches the Kubernetes `securityContext`), one worker per container (TensorFlow memory against the 2 GiB pod limit); namespace labelled for Pod Security Admission (warn/audit `restricted`); ingress rate limit; `matplotlib` added to `requirements-dev.txt` (needed by `plot_confusion_matrix.py`).
   - Benchmark: the bottleneck is derived from the measurement (the old file always named inference although preprocessing was larger); `--iterations` / `--output` options; new `forward_pass_comparison.py` and `scripts/process_scaling.py`.
   - `.github/workflows/ci-cd.yml` added (lint, bandit, tests with coverage gate on SQLite and PostgreSQL, Docker smoke test, 2-replica test, Trivy, kubeconform, kind staging); `scripts/replica_test.sh` and `scripts/load_test.py` provide the replica / load evidence.
-- **Tests**: 189 tests (was 102), 79 % coverage, all passing from a clean clone; the suite now runs in an isolated temporary directory with the standard FastAPI `TestClient` (the home-made ASGI driver failed with other httpx versions and the tests wrote into the project's database).
+- **Tests**: 194 tests (was 102), 79 % coverage, all passing from a clean clone; the suite now runs in an isolated temporary directory with the standard FastAPI `TestClient` (the home-made ASGI driver failed with other httpx versions and the tests wrote into the project's database).
 
 ## [3.2.0] - Milestone 3 Consolidated: Model v1.1.0 Validation, Memory Optimization & Hardened RBAC
 - **AI Model Iteration `v1.1.0` & Quality Gate (Criterion 3 — Questions 1, 2, 9 & 10):**

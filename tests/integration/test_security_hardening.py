@@ -115,3 +115,25 @@ class TestHostileUploads:
         res = client.post("/api/v1/images/upload", files={"file": ("a.jpg", b"not an image at all", "image/jpeg")},
                           headers={"Authorization": f"Bearer {auth_tokens['technician']}"})
         assert res.status_code == 422
+
+
+class TestSelfRegistrationCannotEscalateRole:
+    """Regression: anyone could register as radiologist or ML engineer and then confirm diagnoses / read the audit trail."""
+
+    @pytest.mark.parametrize("role", ["admin", "radiologist", "ml_engineer"])
+    def test_anonymous_cannot_create_a_privileged_account(self, client, role):
+        res = client.post("/api/v1/auth/register", json={"username": f"rogue_{role}", "password": "Password123!",
+                                                          "full_name": "Rogue", "role": role})
+        assert res.status_code == 403
+
+    def test_a_technician_token_cannot_create_a_radiologist(self, client, auth_tokens):
+        res = client.post("/api/v1/auth/register", headers={"Authorization": f"Bearer {auth_tokens['technician']}"},
+                          json={"username": "rogue_rad2", "password": "Password123!", "full_name": "Rogue", "role": "radiologist"})
+        assert res.status_code == 403
+
+    def test_anonymous_can_register_a_technician_and_the_admin_can_create_a_radiologist(self, client, auth_tokens):
+        ok = client.post("/api/v1/auth/register", json={"username": "new_tech", "password": "Password123!", "full_name": "New Tech"})
+        assert ok.status_code == 200 and ok.json()["role"] == "technician"
+        adm = client.post("/api/v1/auth/register", headers={"Authorization": f"Bearer {auth_tokens['admin']}"},
+                          json={"username": "new_rad", "password": "Password123!", "full_name": "New Rad", "role": "radiologist"})
+        assert adm.status_code == 200 and adm.json()["role"] == "radiologist"
