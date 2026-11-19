@@ -224,14 +224,14 @@ def run_benchmark(iterations: int = 15, output: str = ""):
         },
         "bottleneck_breakdown": bottleneck_breakdown,
         "conclusions": {
-            "primary_bottleneck": "Deep Learning Inference (MobileNetV2 CNN forward pass)",
-            "bottleneck_rationale": f"Inference accounts for {bottleneck_breakdown['inference_pct']}% of total latency per request.",
-            "optimization_strategies": [
-                "TensorRT / ONNX Runtime quantization (FP32 to INT8/FP16) reducing inference latency by ~3x.",
-                "Batch prediction queue for non-emergency radiograph processing.",
-                "Horizontal Pod Autoscaling (HPA) in Kubernetes scaling pods based on CPU utilization > 70%.",
-                "Asynchronous Celery/Redis background task for PDF report rendering to decouple HTTP response."
-            ]
+            # derived from the measurement, not hard-coded
+            "primary_bottleneck": max(
+                {"Image preprocessing (decode, validation, quality checks)": bottleneck_breakdown["preprocessing_pct"],
+                 "CNN inference (MobileNetV2 forward pass)": bottleneck_breakdown["inference_pct"],
+                 "PDF report generation": bottleneck_breakdown["report_generation_pct"],
+                 "Audit database write": bottleneck_breakdown["audit_database_pct"]}.items(),
+                key=lambda kv: kv[1])[0],
+            "note": "Single-process, sequential measurement on the machine that ran it; see evidence/replica_test.txt for the multi-replica measurement.",
         }
     }
 
