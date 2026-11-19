@@ -10,6 +10,7 @@
 #   E. availability: stopping one replica does not break requests through the balancer
 #
 #   IMAGE=scoliosis-api:final PY=python bash scripts/replica_test.sh | tee replica_test.txt
+#   DIAGNOSTICS=1 prints container status, OOM kills and log tails before cleanup (used by CI)
 # Requirements: docker, python with httpx/numpy/pillow (pip install -r requirements-dev.txt)
 set -uo pipefail
 IMAGE=${IMAGE:-scoliosis-api:latest}
@@ -18,13 +19,25 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 NET=scol-replica-net
 CPUS=${CPUS:-2}
 
+diagnostics() {
+  # Printed before the containers are removed, so a failure on a CI runner can be explained from its log
+  echo; echo "== DIAGNOSTICS (containers, memory kills, last log lines)"
+  docker ps -a --format 'table {{.Names}}\t{{.Status}}' 2>&1 | grep scol || true
+  for c in scol-api1 scol-api2; do
+    echo "-- $c oom_killed=$(docker inspect --format '{{.State.OOMKilled}} exit={{.State.ExitCode}}' $c 2>&1)"
+    docker logs --tail 25 $c 2>&1 | cut -c1-200
+  done
+  echo "-- balancer"; docker logs --tail 10 scol-lb 2>&1 | cut -c1-200
+}
+
 cleanup() {
+  [ "${DIAGNOSTICS:-0}" = "1" ] && diagnostics
   docker rm -f scol-pg scol-api1 scol-api2 scol-lb >/dev/null 2>&1
   docker network rm $NET >/dev/null 2>&1
   docker volume rm scol-data >/dev/null 2>&1
   rm -f /tmp/scol-nginx.conf
 }
-cleanup
+DIAGNOSTICS=0 cleanup
 trap cleanup EXIT
 
 say() { printf '\n== %s\n' "$*"; }

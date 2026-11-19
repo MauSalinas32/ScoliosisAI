@@ -160,7 +160,7 @@ jobs:
         # shared storage, measured 1-vs-2 replica throughput and availability with one replica down.
         run: |
           pip install httpx numpy pillow
-          IMAGE=${{ steps.meta.outputs.image }}:${{ github.sha }} PY=python bash scripts/replica_test.sh | tee replica_test.txt
+          DIAGNOSTICS=1 IMAGE=${{ steps.meta.outputs.image }}:${{ github.sha }} PY=python bash scripts/replica_test.sh 2>&1 | tee replica_test.txt
           grep -q "classify@replica2=200" replica_test.txt
           grep -q "20 x 200" replica_test.txt
 
