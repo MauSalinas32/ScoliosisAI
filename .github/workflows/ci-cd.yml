@@ -172,14 +172,13 @@ jobs:
           path: replica_test.txt
 
       - name: Trivy vulnerability scan (blocking on fixable CRITICAL)
-        uses: aquasecurity/trivy-action@v0.33.1
-        with:
-          image-ref: ${{ steps.meta.outputs.image }}:${{ github.sha }}
-          format: table
-          exit-code: "1"
-          ignore-unfixed: true
-          vuln-type: os,library
-          severity: CRITICAL
+        # Trivy runs from its published container image (pinned) instead of an installer action,
+        # so the step does not depend on downloading a binary at run time.
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy:0.58.1 image --scanners vuln --pkg-types os,library \
+            --severity CRITICAL --ignore-unfixed --exit-code 1 --no-progress \
+            ${{ steps.meta.outputs.image }}:${{ github.sha }}
 
       - name: Log in to GHCR
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
