@@ -264,6 +264,42 @@ class ValidationStage(IPipelineStage):
             raise PipelineStageError("Validation", f"DICOM read error: {str(e)}")
 
 
+# Direct identifiers erased from the DICOM file that is written to disk (in addition to PHI_FIELDS)
+_EXTRA_DICOM_PHI = (
+    "OtherPatientIDs", "OtherPatientNames", "PatientTelephoneNumbers", "PatientMotherBirthName",
+    "AccessionNumber", "StudyID", "PerformingPhysicianName", "OperatorsName", "InstitutionAddress",
+    "InstitutionalDepartmentName", "StationName", "RequestingPhysician", "StudyDescription", "SeriesDescription",
+)
+
+
+def is_dicom_bytes(file_data: bytes, filename: str = "") -> bool:
+    ext = Path(filename).suffix.lower() if filename else ""
+    return ext == ".dcm" or (len(file_data) > 132 and file_data[128:132] == b"DICM")
+
+
+def anonymize_dicom_bytes(file_data: bytes) -> bytes:
+    """
+    Return a copy of a DICOM file without direct identifiers (patient name / id / birth date / address,
+    physicians, institution, study dates, private tags). Pixel data is untouched.
+
+    The previous implementation only masked a metadata dictionary in memory while the uploaded file was
+    stored byte-for-byte, so the patient's identity stayed on disk.
+    """
+    import pydicom
+    ds = pydicom.dcmread(io.BytesIO(file_data), force=True)
+    for name in list(AnonymizationStage.PHI_FIELDS) + list(_EXTRA_DICOM_PHI):
+        if name in ds:
+            ds.data_element(name).value = ""
+    ds.remove_private_tags()
+    ds.PatientIdentityRemoved = "YES"
+    out = io.BytesIO()
+    try:
+        ds.save_as(out)
+    except Exception as exc:  # fail closed: never store a file whose identifiers could not be erased
+        raise CorruptedImageError(f"DICOM file could not be anonymized: {exc}")
+    return out.getvalue()
+
+
 # ═══════════════════════════════════════════════════════════════
 # Stage 2: Anonymization (PHI Removal — RD-02)
 # ═══════════════════════════════════════════════════════════════
@@ -274,7 +310,7 @@ class AnonymizationStage(IPipelineStage):
 
     Ensures compliance with privacy requirements (RD-02, RNF-04) by removing
     or masking patient identifiers before the image reaches the AI engine.
-    The original image is preserved separately (RD-13).
+    For DICOM uploads the stored file is also scrubbed (see ``anonymize_dicom_bytes``).
     """
 
     PHI_FIELDS = [
@@ -303,7 +339,7 @@ class AnonymizationStage(IPipelineStage):
         context.metadata["anonymization"] = {
             "performed": True,
             "fields_anonymized": anonymized_fields,
-            "method": "PHI field removal + EXIF strip",
+            "method": "DICOM PHI tags erased in the stored file + metadata masked",
         }
         context.is_anonymized = True
 

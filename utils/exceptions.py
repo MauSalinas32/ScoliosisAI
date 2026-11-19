@@ -113,6 +113,18 @@ class ModelNotLoadedError(InferenceError):
         self.error_code = "MODEL_NOT_LOADED"
 
 
+class InvalidModelInputError(InferenceError):
+    """Raised when the tensor given to the model violates the input contract (shape / range [0, 1]).
+
+    The network rescales [0, 1] to [-1, 1] internally; feeding [0, 255] values (or any other
+    range) silently produces meaningless probabilities, so it is rejected before inference.
+    """
+
+    def __init__(self, reason: str):
+        super().__init__(f"Invalid model input: {reason}")
+        self.error_code = "INVALID_MODEL_INPUT"
+
+
 class ModelLoadError(InferenceError):
     """Raised when a model cannot be loaded from the registry."""
 

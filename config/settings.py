@@ -15,7 +15,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = Path(os.getenv("DATA_DIR", str(BASE_DIR / "data")))
 UPLOAD_DIR = DATA_DIR / "uploads"
 PROCESSED_DIR = DATA_DIR / "processed"
-MODEL_DIR = Path(os.getenv("MODEL_DIR", str(DATA_DIR / "models")))
+# Model artefacts live in <repo>/models (versioned with the code and copied into the Docker image).
+# Override with MODEL_DIR when artefacts are stored elsewhere (e.g. a mounted volume).
+MODEL_DIR = Path(os.getenv("MODEL_DIR", str(BASE_DIR / "models")))
 REPORTS_DIR = DATA_DIR / "reports"
 LOGS_DIR = Path(os.getenv("LOGS_DIR", str(BASE_DIR / "logs")))
 
@@ -57,10 +59,20 @@ DATABASE_URL = os.getenv(
 
 # ── Environment & Security (Authentication & User Service) ────
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development").lower()
-SECRET_KEY = os.getenv("SECRET_KEY", "team3-medical-ai-system-secret-key-2026-secure")
+_DEV_SECRET_KEY = "dev-only-insecure-key-change-me-0123456789"
+SECRET_KEY = os.getenv("SECRET_KEY", _DEV_SECRET_KEY)
+if ENVIRONMENT == "production" and (SECRET_KEY == _DEV_SECRET_KEY or len(SECRET_KEY) < 32):
+    # Fail fast: never run a production deployment with a public / weak signing key.
+    raise RuntimeError("SECRET_KEY must be set to a random value of at least 32 characters when ENVIRONMENT=production")
 ALGORITHM = "HS256"
+# Browsers may call the API from these origins. The web portal is served by the API itself (same origin),
+# so production allows none by default; set CORS_ALLOWED_ORIGINS="https://a.example,https://b.example" if needed.
+CORS_ALLOWED_ORIGINS = [
+    o.strip() for o in os.getenv("CORS_ALLOWED_ORIGINS", "" if ENVIRONMENT == "production" else "*").split(",") if o.strip()
+]
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
-OTP_LOG_CODES = os.getenv("OTP_LOG_CODES", "true").lower() in ("1", "true", "yes")
+# One-time codes are printed to the console (simulated SMS) only outside production.
+OTP_LOG_CODES = os.getenv("OTP_LOG_CODES", "false" if ENVIRONMENT == "production" else "true").lower() in ("1", "true", "yes")
 
 # ── Image Validation (Fail Fast Principle) ────────────────────
 ALLOWED_EXTENSIONS = {".dcm", ".jpg", ".jpeg", ".png", ".tiff", ".tif"}
@@ -87,6 +99,9 @@ CLASS_LABELS = {
 }
 TRANSFER_LEARNING_BASE_MODEL = "MobileNetV2"  # Pre-trained on ImageNet
 
+# Training only: allow a synthetic dataset when the real one is missing (smoke tests, never for release)
+ALLOW_SYNTHETIC_DATA = os.getenv("ALLOW_SYNTHETIC_DATA", "false").lower() in ("1", "true", "yes")
+
 # Scoliosis dataset path (provided in repository)
 SCOLIOSIS_DATASET_DIR = Path(
     os.getenv(
@@ -98,14 +113,14 @@ SCOLIOSIS_DATASET_DIR = Path(
 # ── Logging & Audit (Audit Service) ──────────────────────────
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 LOG_FORMAT = "{time:YYYY-MM-DD HH:mm:ss} | {level:<8} | {name}:{function}:{line} | {message}"
-AUDIT_LOG_RETENTION_DAYS = 365  # Immutable audit trail
+AUDIT_LOG_RETENTION_DAYS = 5 * 365  # append-only trail kept at least 5 years (NOM-004-SSA3-2012: clinical record retention)
 
 # ── API Gateway Configuration ─────────────────────────────────
-API_HOST = os.getenv("API_HOST", "0.0.0.0")
+API_HOST = os.getenv("API_HOST", "0.0.0.0")  # nosec B104 - must listen on all interfaces inside the container
 API_PORT = int(os.getenv("API_PORT", "8000"))
 API_TITLE = "Scoliosis AI Diagnostic System"
 API_DESCRIPTION = (
     "AI-powered clinical decision support system for spinal scoliosis "
     "classification and vertebral curve analysis"
 )
-API_VERSION = "3.2.0"
+API_VERSION = "3.3.0"

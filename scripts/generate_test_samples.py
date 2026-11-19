@@ -8,7 +8,6 @@ Extracts representative spinal radiographs from the scoliosis dataset for:
   4. Invalid color image sample (for testing Fail-Fast pipeline validation)
 """
 
-import os
 import shutil
 from pathlib import Path
 import numpy as np

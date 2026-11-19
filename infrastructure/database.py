@@ -26,6 +26,7 @@ from sqlalchemy import (
     DateTime,
     Text,
     event,
+    text,
 )
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -178,8 +179,12 @@ class ModelVersionDB(Base):
     description = Column(Text, nullable=True)
 
 
-def init_database():
-    """Create all tables if they don't exist and ensure schema migrations."""
+# Arbitrary constant shared by every replica: identifies the schema-creation advisory lock in PostgreSQL
+_SCHEMA_LOCK_KEY = 727274
+
+
+def _create_schema():
+    """Create all tables and apply additive migrations (idempotent)."""
     Base.metadata.create_all(bind=engine)
     if _is_sqlite:
         try:
@@ -205,3 +210,24 @@ def get_db_session():
         yield session
     finally:
         session.close()
+
+
+def init_database():
+    """
+    Create all tables if they don't exist and apply additive schema migrations.
+
+    Safe to call from several replicas at the same time: on PostgreSQL a session-level advisory
+    lock serialises the schema work. Without it, two pods starting together on an empty database
+    both try to CREATE TABLE and one of them crashes with a unique violation (CrashLoopBackOff on
+    the first Kubernetes deployment; reproduced with scripts/replica_test.sh).
+    """
+    if _is_sqlite:
+        _create_schema()
+        return
+    with engine.connect() as lock_conn:
+        lock_conn.execute(text("SELECT pg_advisory_lock(:key)"), {"key": _SCHEMA_LOCK_KEY})
+        try:
+            _create_schema()
+        finally:
+            lock_conn.execute(text("SELECT pg_advisory_unlock(:key)"), {"key": _SCHEMA_LOCK_KEY})
+            lock_conn.commit()

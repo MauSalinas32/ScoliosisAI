@@ -16,7 +16,7 @@ import hmac
 import json
 import secrets
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from config.settings import SECRET_KEY
 from domain.interfaces.contracts import (

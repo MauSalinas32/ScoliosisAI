@@ -35,6 +35,7 @@ from config.settings import (
     BATCH_SIZE,
     DEFAULT_MODEL_NAME,
     SCOLIOSIS_DATASET_DIR,
+    ALLOW_SYNTHETIC_DATA,
 )
 from ai.metrics import compute_classification_metrics, passes_quality_gate
 from utils.logger import get_logger
@@ -300,7 +301,13 @@ class TransferLearningTrainer:
         test_imgs, test_lbls, test_names = self._load_split_with_names(root_dir, "test")
 
         if len(train_imgs) == 0:
-            logger.warning("No scoliosis images found on disk. Generating synthetic dataset.")
+            if not ALLOW_SYNTHETIC_DATA:
+                raise FileNotFoundError(
+                    f"No labelled radiographs found under '{root_dir}' (expected images/<split> and labels/<split>). "
+                    "Pass --dataset <path> or set SCOLIOSIS_DATASET_DIR. A synthetic dataset is used only when "
+                    "ALLOW_SYNTHETIC_DATA=true (smoke tests); a model trained on it must never be released."
+                )
+            logger.warning("ALLOW_SYNTHETIC_DATA is set: training on a SYNTHETIC dataset (smoke test only).")
             train_imgs, train_lbls = self._generate_synthetic_data(300)
             val_imgs, val_lbls = self._generate_synthetic_data(60)
             test_imgs, test_lbls = self._generate_synthetic_data(60)
@@ -621,7 +628,11 @@ class TransferLearningTrainer:
         self._model.save(save_file)
 
         eval_data = metrics or self._last_metrics or {}
-        gate = eval_data.get("quality_gate") or passes_quality_gate(eval_data) if eval_data else {"approved": True, "reasons": []}
+        # A model saved without evaluation metrics is never approved (fail closed)
+        if eval_data:
+            gate = eval_data.get("quality_gate") or passes_quality_gate(eval_data)
+        else:
+            gate = {"approved": False, "reasons": ["no evaluation metrics were provided"]}
 
         metadata = {
             "model_name": DEFAULT_MODEL_NAME,

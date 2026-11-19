@@ -17,7 +17,7 @@ from domain.interfaces.contracts import (
     AuditAction,
 )
 from pipeline.core import AIPipeline, PipelineContext
-from pipeline.stages import ValidationStage, AnonymizationStage, sanitize_filename
+from pipeline.stages import ValidationStage, AnonymizationStage, sanitize_filename, is_dicom_bytes, anonymize_dicom_bytes
 from utils.logger import get_logger
 from utils.exceptions import ImageValidationError
 
@@ -59,7 +59,7 @@ class ImageManagementService:
 
         Process:
           1. Sanitize filename and run Fail Fast validation pipeline.
-          2. Store original image (unmodified — RD-13).
+          2. Store the image (DICOM files are stored WITHOUT direct patient identifiers).
           3. Save metadata to database.
           4. Record audit entry.
 
@@ -87,7 +87,9 @@ class ImageManagementService:
                 raise context.last_exception
             raise ImageValidationError(error_msg)
 
-        # Step 2: Store original image (preserved unmodified — RD-13)
+        # Step 2: Store the image. Direct identifiers never reach the disk: a DICOM file is scrubbed first.
+        if is_dicom_bytes(file_data, safe_name):
+            file_data = anonymize_dicom_bytes(file_data)
         unique_filename = f"{uuid.uuid4().hex}_{safe_name}"
         stored_path = self._storage.store(file_data, unique_filename, "originals")
 

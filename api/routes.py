@@ -16,7 +16,6 @@ from typing import Dict, List, Optional
 import zoneinfo
 
 from fastapi import APIRouter, UploadFile, File, HTTPException, Header, Response
-from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 
 from config.settings import MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB, REPORTS_DIR, API_VERSION
@@ -26,7 +25,8 @@ from domain.interfaces.contracts import (
     AuditAction,
     AuditEntry,
 )
-from infrastructure.database import session_scope, OneTimeCodeDB, UserDB
+from infrastructure.database import session_scope, UserDB
+from config.settings import OTP_LOG_CODES
 from pipeline.stages import decode_image, sanitize_filename
 from utils.exceptions import (
     AuthenticationError,
@@ -34,6 +34,7 @@ from utils.exceptions import (
     OneTimeCodeError,
     FileSizeExceededError,
     ImageValidationError,
+    InvalidModelInputError,
     ModelNotLoadedError,
     StorageError,
 )
@@ -84,9 +85,22 @@ class ResetPasswordRequest(BaseModel):
     new_password: str
 
 
-# Mirror dictionary kept in sync with OneTimeCodeRepository for test fixtures
+# Development/test mirror of the last code "sent" per user (simulated SMS gateway).
+# It is filled ONLY when OTP_LOG_CODES is true (never in production); the database keeps
+# just the HMAC hash of every code.
 _2fa_codes: Dict[str, Dict] = {}
 _recovery_codes: Dict[str, Dict] = {}
+
+
+def _deliver_otp(kind: str, username: str, code: str) -> None:
+    """Simulated SMS/e-mail gateway. In production the code goes to a real provider, never to logs."""
+    log = get_logger("OTP")
+    if not OTP_LOG_CODES:
+        log.info(f"{kind} verification code sent to '{username}'")
+        return
+    store = _2fa_codes if kind == "2FA" else _recovery_codes
+    store[username] = {"code": code}
+    log.info(f"[SIMULATED SMS] {kind} CODE for '{username}': {code}")
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -141,20 +155,6 @@ def create_router(
         username = payload.get("sub")
         user_id = payload.get("user_id")
         role_str = payload.get("role", "")
-
-        # Block token use if user still has an unverified 2FA challenge pending
-        if username:
-            with session_scope() as session:
-                pending_2fa = (
-                    session.query(OneTimeCodeDB)
-                    .filter_by(username=username, purpose="2fa")
-                    .first()
-                )
-                if pending_2fa is not None:
-                    raise HTTPException(
-                        status_code=401,
-                        detail="Two-factor authentication (2FA) verification is incomplete.",
-                    )
 
         if not user_id and username:
             u = auth_service._user_repo.find_by_username(username)
@@ -232,40 +232,29 @@ def create_router(
 
     @router.post("/auth/login", tags=["Authentication"])
     async def login(request: LoginRequest):
-        """Authenticate credentials and issue a 6-digit 2FA challenge (RF-01)."""
+        """
+        Step 1 of 2FA login (RF-01): validate credentials and send a 6-digit code.
+
+        NO token is issued here. The JWT is returned only by /auth/verify-2fa after the
+        code is verified, so there is no half-authenticated token that could be reused.
+        """
         try:
             user, code = auth_service.initiate_2fa_login(request.username, request.password)
-            # Issue token that remains locked until /auth/verify-2fa consumes the OTP
-            token_bundle = auth_service.issue_jwt_for_user(user, record_audit=False)
-            _2fa_codes[request.username] = {"code": code, "attempts": 1}
-
-            logger = get_logger("2FA_System")
-            logger.info("=" * 60)
-            logger.info(f" [SECURITY NOTICE] 2FA SECURITY CODE FOR '{request.username}' ")
-            logger.info(f" CODE: {code} ")
-            logger.info("=" * 60)
-
-            return {
-                "status": "2fa_required",
-                "username": request.username,
-                "access_token": token_bundle["access_token"],
-            }
-        except Exception as e:
+        except AuthenticationError as e:
             raise HTTPException(status_code=401, detail=str(e))
+        _deliver_otp("2FA", request.username, code)
+        return {
+            "status": "2fa_required",
+            "username": user.username,
+            "expires_in_minutes": 5,
+        }
 
     @router.post("/auth/resend-2fa", tags=["Authentication"])
     async def resend_2fa(request: Resend2FARequest):
         """Resend the 2FA code (Max 3 sends)."""
         try:
             new_code, attempts_left = auth_service.resend_2fa_code(request.username)
-            sends_used = 3 - attempts_left
-            _2fa_codes[request.username] = {"code": new_code, "attempts": sends_used}
-
-            logger = get_logger("2FA_System")
-            logger.info("=" * 60)
-            logger.info(f" [RESEND] 2FA SECURITY CODE FOR '{request.username}' ")
-            logger.info(f" NEW CODE: {new_code} (Attempt {sends_used}/3) ")
-            logger.info("=" * 60)
+            _deliver_otp("2FA", request.username, new_code)
 
             return {"status": "resent", "attempts_left": attempts_left}
         except OneTimeCodeError as e:
@@ -313,11 +302,14 @@ def create_router(
         Generate and send a 6-digit password recovery code.
         Uses HMAC-SHA256 persistence in one_time_codes.
         """
+        generic = {
+            "status": "code_sent",
+            "message": "If the account exists, a verification code was sent to its registered contact.",
+            "username": request.username,
+        }
         user = auth_service._user_repo.find_by_username(request.username)
-        if not user:
-            raise HTTPException(status_code=404, detail=f"User '{request.username}' not found.")
-        if not user.is_active:
-            raise HTTPException(status_code=400, detail="This user account is deactivated.")
+        if not user or not user.is_active:
+            return generic  # same answer for unknown / inactive users (no account enumeration)
 
         code, _ = auth_service._otp_repo.issue_code(
             username=request.username,
@@ -325,20 +317,8 @@ def create_router(
             ttl_minutes=15,
             is_resend=False,
         )
-        _recovery_codes[request.username] = {"code": code, "attempts": 0}
-
-        logger = get_logger("PasswordRecovery")
-        logger.info("=" * 64)
-        logger.info(" [PASSWORD RECOVERY] - Medical AI System")
-        logger.info(f" User: '{request.username}' ({user.full_name})")
-        logger.info(f" RECOVERY CODE (SMS/OTP): {code}")
-        logger.info("=" * 64)
-
-        return {
-            "status": "code_sent",
-            "message": f"Verification code sent to registered contact for '{request.username}'.",
-            "username": request.username,
-        }
+        _deliver_otp("RECOVERY", request.username, code)
+        return generic
 
     @router.post("/auth/reset-password", tags=["Authentication"])
     async def reset_password(request: ResetPasswordRequest):
@@ -384,7 +364,6 @@ def create_router(
                 UserRole.ML_ENGINEER,
             ],
             action_name="upload_image",
-            require_token=False,
         )
         user_id = caller.get("user_id") if caller else None
 
@@ -431,7 +410,6 @@ def create_router(
                 UserRole.ML_ENGINEER,
             ],
             action_name="list_images",
-            require_token=False,
         )
         safe_limit = max(1, min(limit, 500))
         safe_offset = max(0, offset)
@@ -466,7 +444,6 @@ def create_router(
                 UserRole.ML_ENGINEER,
             ],
             action_name="get_image",
-            require_token=False,
         )
         image = image_service.get_image(image_id)
         if not image:
@@ -504,7 +481,6 @@ def create_router(
                 UserRole.ML_ENGINEER,
             ],
             action_name="classify_image",
-            require_token=False,
         )
         user_id = caller.get("user_id") if caller else None
 
@@ -576,6 +552,8 @@ def create_router(
             raise
         except ModelNotLoadedError as e:
             raise HTTPException(status_code=503, detail=str(e))
+        except InvalidModelInputError as e:
+            raise HTTPException(status_code=422, detail=str(e))
         except (StorageError, FileNotFoundError) as e:
             raise HTTPException(status_code=404, detail=f"Original image file not found in storage: {str(e)}")
         except Exception as e:
@@ -593,7 +571,6 @@ def create_router(
                 UserRole.ML_ENGINEER,
             ],
             action_name="get_model_info",
-            require_token=False,
         )
         return inference_service.get_model_info()
 
@@ -614,7 +591,6 @@ def create_router(
             authorization,
             allowed_roles=[UserRole.RADIOLOGIST, UserRole.ADMIN],
             action_name="list_clinical_results",
-            require_token=False,
         )
         try:
             status_filter = PredictionStatus(status) if status else None
@@ -652,7 +628,6 @@ def create_router(
             authorization,
             allowed_roles=[UserRole.RADIOLOGIST, UserRole.ADMIN],
             action_name="get_clinical_result",
-            require_token=False,
         )
         result = clinical_service.get_result(result_id)
         if not result:
@@ -688,9 +663,8 @@ def create_router(
         """
         caller = _authenticate_and_authorize(
             authorization,
-            allowed_roles=[UserRole.RADIOLOGIST, UserRole.ADMIN],
+            allowed_roles=[UserRole.RADIOLOGIST],
             action_name="review_prediction",
-            require_token=True,
         )
         reviewer_id = caller.get("user_id") or 1
 
@@ -729,7 +703,6 @@ def create_router(
             authorization,
             allowed_roles=[UserRole.RADIOLOGIST, UserRole.ADMIN],
             action_name="generate_report",
-            require_token=False,
         )
         user_id = caller.get("user_id") if caller else None
 
@@ -766,7 +739,6 @@ def create_router(
             authorization,
             allowed_roles=[UserRole.RADIOLOGIST, UserRole.ADMIN],
             action_name="download_report",
-            require_token=False,
         )
 
         # Path-traversal guard
@@ -803,7 +775,6 @@ def create_router(
             authorization,
             allowed_roles=[UserRole.ADMIN, UserRole.ML_ENGINEER],
             action_name="view_audit_trail",
-            require_token=False,
         )
 
         try:

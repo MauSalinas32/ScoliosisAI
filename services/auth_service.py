@@ -10,8 +10,9 @@ This service handles:
   - Role-based access control (RBAC) enforcement.
 """
 
+import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from jose import jwt, JWTError
 from passlib.context import CryptContext
@@ -27,11 +28,13 @@ from domain.interfaces.contracts import (
 )
 from infrastructure.repositories import OneTimeCodeRepository
 from utils.logger import get_logger
-from utils.exceptions import AuthenticationError, AuthorizationError, OneTimeCodeError
+from utils.exceptions import AuthenticationError, AuthorizationError
 
 logger = get_logger("AuthService")
 
 # Password hashing context
+# passlib 1.7.4 probes bcrypt's removed __about__ attribute and logs a harmless "(trapped)" traceback with bcrypt >= 4.1
+logging.getLogger("passlib.handlers.bcrypt").setLevel(logging.ERROR)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 

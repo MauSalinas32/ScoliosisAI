@@ -47,7 +47,7 @@ def generate_benchmark_image(width=1024, height=1024) -> bytes:
     return buf.getvalue()
 
 
-def run_benchmark(iterations: int = 15):
+def run_benchmark(iterations: int = 15, output: str = ""):
     logger.info("=" * 70)
     logger.info("  Performance, Latency & Scalability Benchmark — Milestone 3")
     logger.info(f"  Iterations: {iterations}")
@@ -59,8 +59,8 @@ def run_benchmark(iterations: int = 15):
     audit_repo = AuditRepository()
     image_repo = ImageRepository()
     result_repo = ResultRepository()
-    user_repo = UserRepository()
-    storage = LocalStorageAdapter()
+    UserRepository()
+    LocalStorageAdapter()
     model_registry = ModelRegistry()
 
     preprocessing_service = PreprocessingService(audit_repository=audit_repo)
@@ -153,7 +153,7 @@ def run_benchmark(iterations: int = 15):
             curve_type=inf_result.get("curve_type"),
             curve_detail=inf_result.get("curve_detail"),
         )
-        pdf_path = clinical_service.generate_report(
+        clinical_service.generate_report(
             result_id=saved_pred.id,
             reviewer_name="Dr. Benchmark Radiologist",
             language="es",
@@ -235,7 +235,7 @@ def run_benchmark(iterations: int = 15):
         }
     }
 
-    output_file = Path(__file__).parent.parent.parent / "data" / "performance_benchmark_results.json"
+    output_file = Path(output) if output else Path(__file__).parent.parent.parent / "data" / "performance_benchmark_results.json"
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
 
@@ -262,4 +262,9 @@ def run_benchmark(iterations: int = 15):
 
 
 if __name__ == "__main__":
-    run_benchmark(iterations=15)
+    import argparse
+    parser = argparse.ArgumentParser(description="End-to-end latency benchmark (real model, real pipeline)")
+    parser.add_argument("--iterations", type=int, default=15)
+    parser.add_argument("--output", default="", help="JSON file to write (default: data/performance_benchmark_results.json)")
+    cli = parser.parse_args()
+    run_benchmark(iterations=cli.iterations, output=cli.output)

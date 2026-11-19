@@ -23,7 +23,7 @@ COPY requirements.txt .
 
 # Install dependencies into isolated wheels directory
 RUN pip install --upgrade pip && \
-    pip wheel --no-cache-dir --no-deps --wheel-dir /build/wheels -r requirements.txt
+    pip wheel --no-cache-dir --wheel-dir /build/wheels -r requirements.txt
 
 # ------------------------------------------------------------------------------
 # Stage 2: Final Runtime Image
@@ -32,7 +32,7 @@ FROM python:3.11-slim AS runner
 
 # Metadata labels
 LABEL maintainer="Equipo 3 - Software Engineering II" \
-      version="3.2.0" \
+      version="3.3.0" \
       description="Medical Image Classification System with Transfer Learning & Vertebral Tracking"
 
 WORKDIR /app
@@ -45,13 +45,11 @@ RUN apt-get update && apt-get upgrade -y --no-install-recommends && \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy built wheels from builder stage
-COPY --from=builder /build/wheels /wheels
-COPY --from=builder /build/requirements.txt .
-
-# Upgrade core packaging tools to patch CVEs and install wheels without compiler overhead
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir /wheels/* && rm -rf /wheels
+# Install the wheels built in stage 1. They are bind-mounted (not COPY'd) so the ~2 GB of wheels
+# never become an image layer; only the installed packages remain.
+COPY requirements.txt .
+RUN --mount=type=bind,from=builder,source=/build/wheels,target=/wheels \
+    pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.txt
 
 # Create dedicated non-root application user for clinical data security compliance
 RUN groupadd -r medicalgroup && useradd -r -g medicalgroup -d /app medicaluser
