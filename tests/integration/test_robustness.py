@@ -11,9 +11,9 @@ import pytest
 from PIL import Image
 
 
-def _png(arr: np.ndarray, mode: str) -> bytes:
+def _png(arr: np.ndarray, mode: str = "") -> bytes:
     buf = io.BytesIO()
-    Image.fromarray(arr, mode=mode).save(buf, format="PNG")
+    Image.fromarray(arr).save(buf, format="PNG")  # the mode follows from the array dtype and shape
     return buf.getvalue()
 
 

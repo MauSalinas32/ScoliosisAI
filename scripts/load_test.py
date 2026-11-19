@@ -39,7 +39,7 @@ def synthetic_radiograph(size: int = 1024) -> bytes:
     column = np.clip(180 - np.abs(x - size // 2) / (size / 400), 0, None) + 40
     arr = np.tile(column, (size, 1)).astype(np.uint8)
     buf = io.BytesIO()
-    Image.fromarray(arr, mode="L").convert("RGB").save(buf, format="JPEG", quality=90)
+    Image.fromarray(arr).convert("RGB").save(buf, format="JPEG", quality=90)
     return buf.getvalue()
 
 

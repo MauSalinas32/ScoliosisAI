@@ -89,7 +89,7 @@ def sample_xray_image() -> bytes:
     row = np.clip(np.maximum(0, 180 - dist) + 40, 0, 255).astype(np.uint8)
     arr = np.broadcast_to(row, (600, 400)).copy()
 
-    img = Image.fromarray(arr, mode="L").convert("RGB")
+    img = Image.fromarray(arr).convert("RGB")
     buf = io.BytesIO()
     img.save(buf, format="JPEG", quality=90)
     return buf.getvalue()

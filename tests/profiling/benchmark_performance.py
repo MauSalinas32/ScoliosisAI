@@ -41,7 +41,7 @@ logger = get_logger("PerformanceBenchmark")
 def generate_benchmark_image(width=1024, height=1024) -> bytes:
     """Generate synthetic realistic 3-channel X-ray image bytes."""
     arr = np.random.randint(40, 220, (height, width, 3), dtype=np.uint8)
-    img = Image.fromarray(arr, mode="RGB")
+    img = Image.fromarray(arr)
     buf = io.BytesIO()
     img.save(buf, format="JPEG", quality=90)
     return buf.getvalue()

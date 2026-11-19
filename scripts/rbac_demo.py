@@ -21,7 +21,7 @@ def radiograph() -> bytes:
     x = np.arange(400)
     row = np.clip(np.maximum(0, 180 - np.abs(x - 200)) + 40, 0, 255).astype(np.uint8)
     buf = io.BytesIO()
-    Image.fromarray(np.broadcast_to(row, (600, 400)).copy(), mode="L").convert("RGB").save(buf, format="JPEG", quality=90)
+    Image.fromarray(np.broadcast_to(row, (600, 400)).copy()).convert("RGB").save(buf, format="JPEG", quality=90)
     return buf.getvalue()
 
 

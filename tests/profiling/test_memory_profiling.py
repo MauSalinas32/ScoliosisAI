@@ -38,7 +38,7 @@ class TestMemoryProfiling:
         profile = np.clip(180 - dist // 3 + 35, 0, 255).astype(np.uint8)
         arr[:] = profile[None, :]
 
-        img = Image.fromarray(arr, mode="L").convert("RGB")
+        img = Image.fromarray(arr).convert("RGB")
         buf = io.BytesIO()
         img.save(buf, format="JPEG", quality=90)
         xray_1024_bytes = buf.getvalue()
