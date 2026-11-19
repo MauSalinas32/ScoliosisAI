@@ -11,13 +11,16 @@ This service handles:
 """
 
 import logging
+import uuid
 from datetime import datetime, timedelta
 from typing import List, Optional, Tuple
 
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 
-from config.settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from config.settings import (
+    SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, MIN_PASSWORD_LENGTH, MAX_LOGIN_FAILURES, LOGIN_LOCKOUT_MINUTES,
+)
 from domain.interfaces.contracts import (
     IUserRepository,
     IAuditRepository,
@@ -26,9 +29,9 @@ from domain.interfaces.contracts import (
     AuditEntry,
     AuditAction,
 )
-from infrastructure.repositories import OneTimeCodeRepository
+from infrastructure.repositories import OneTimeCodeRepository, TokenRevocationRepository, LoginAttemptRepository
 from utils.logger import get_logger
-from utils.exceptions import AuthenticationError, AuthorizationError
+from utils.exceptions import AccountLockedError, AuthenticationError, AuthorizationError
 
 logger = get_logger("AuthService")
 
@@ -51,10 +54,14 @@ class AuthService:
         user_repository: IUserRepository,
         audit_repository: IAuditRepository,
         one_time_code_repository: Optional[OneTimeCodeRepository] = None,
+        token_repository: Optional[TokenRevocationRepository] = None,
+        attempt_repository: Optional[LoginAttemptRepository] = None,
     ):
         self._user_repo = user_repository
         self._audit_repo = audit_repository
         self._otp_repo = one_time_code_repository or OneTimeCodeRepository()
+        self._token_repo = token_repository or TokenRevocationRepository()
+        self._attempt_repo = attempt_repository or LoginAttemptRepository()
 
     def register_user(
         self,
@@ -70,8 +77,8 @@ class AuthService:
 
         if len(clean_username) < 3 or len(clean_username) > 64:
             raise AuthenticationError("Username must be between 3 and 64 characters long")
-        if not clean_password or len(clean_password) < 6:
-            raise AuthenticationError("Password must be at least 6 characters long")
+        if not clean_password or len(clean_password) < MIN_PASSWORD_LENGTH:
+            raise AuthenticationError(f"Password must be at least {MIN_PASSWORD_LENGTH} characters long")
         if not clean_full_name or len(clean_full_name) > 120:
             raise AuthenticationError("Full name must be between 1 and 120 characters long")
 
@@ -98,6 +105,12 @@ class AuthService:
         """Validate username and password without issuing a JWT yet."""
         clean_username = (username or "").replace("\x00", "").strip()[:64]
         clean_password = (password or "").replace("\x00", "")
+
+        # Password-guessing protection (counted in the database, so it holds across replicas)
+        if self._attempt_repo.count_recent(clean_username, LOGIN_LOCKOUT_MINUTES) >= MAX_LOGIN_FAILURES:
+            logger.warning(f"Login blocked (too many failures) for: {clean_username}")
+            raise AccountLockedError(LOGIN_LOCKOUT_MINUTES)
+
         user = self._user_repo.find_by_username(clean_username)
 
         pwd_bytes = clean_password.encode("utf-8")
@@ -105,21 +118,26 @@ class AuthService:
 
         if not user or not pwd_context.verify(safe_password, user.hashed_password):
             logger.warning(f"Failed login attempt for: {username}")
+            self._attempt_repo.record_failure(clean_username)   # also for unknown names: no user enumeration
             raise AuthenticationError("Invalid username or password")
 
         if not user.is_active:
             raise AuthenticationError("User account is deactivated")
 
+        self._attempt_repo.clear(clean_username)
         return user
 
     def issue_jwt_for_user(self, user: User, record_audit: bool = True) -> dict:
         """Issue a signed JWT HS256 token for a verified user."""
+        now = datetime.utcnow()
         token_data = {
+            "jti": uuid.uuid4().hex,                 # identifier used to revoke this token at logout
+            "iat": now,
             "sub": user.username,
             "user_id": user.id,
             "role": user.role.value,
             "full_name": user.full_name,
-            "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+            "exp": now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
         }
         access_token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -178,9 +196,27 @@ class AuthService:
         """Verify and decode a JWT token."""
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            return payload
         except JWTError as e:
             raise AuthenticationError(f"Invalid or expired token: {str(e)}")
+        jti = payload.get("jti")
+        if jti and self._token_repo.is_revoked(jti):
+            raise AuthenticationError("Token has been revoked (user logged out).")
+        return payload
+
+    def revoke_token(self, payload: dict) -> None:
+        """Logout: the token stops working immediately instead of at its expiry."""
+        jti = payload.get("jti")
+        if not jti:
+            return
+        expires_at = datetime.utcfromtimestamp(payload["exp"]) if payload.get("exp") else datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        self._token_repo.revoke(jti, expires_at)
+        self._audit_repo.append(AuditEntry(
+            action=AuditAction.USER_LOGOUT,
+            user_id=payload.get("user_id"),
+            resource_type="user",
+            resource_id=payload.get("user_id"),
+            details=f"User '{payload.get('sub')}' logged out; token revoked",
+        ))
 
     def authorize(self, user_role: str, required_roles: List[UserRole]) -> bool:
         """
@@ -202,8 +238,8 @@ class AuthService:
         if not user:
             raise AuthenticationError(f"User '{username}' not found")
 
-        if len(new_password) < 6:
-            raise AuthenticationError("New password must be at least 6 characters long")
+        if len(new_password) < MIN_PASSWORD_LENGTH:
+            raise AuthenticationError(f"New password must be at least {MIN_PASSWORD_LENGTH} characters long")
 
         pwd_bytes = new_password.encode("utf-8")
         safe_password = pwd_bytes[:72].decode("utf-8", "ignore") if len(pwd_bytes) > 72 else new_password

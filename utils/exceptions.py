@@ -69,6 +69,14 @@ class AuthenticationError(MedicalSystemError):
         super().__init__(message, error_code="AUTH_ERROR")
 
 
+class AccountLockedError(AuthenticationError):
+    """Raised when too many failed password attempts were made for a username (HTTP 429)."""
+
+    def __init__(self, minutes: int):
+        super().__init__(f"Too many failed login attempts. Try again in {minutes} minutes.")
+        self.error_code = "ACCOUNT_LOCKED"
+
+
 class OneTimeCodeError(AuthenticationError):
     """Raised when a 2FA or password recovery one-time code is invalid, expired, or locked."""
 

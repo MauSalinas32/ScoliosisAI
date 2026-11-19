@@ -9,6 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from utils.exceptions import (
+    AccountLockedError,
     AuthenticationError,
     AuthorizationError,
     FileSizeExceededError,
@@ -25,6 +26,7 @@ logger = get_logger("ErrorHandlers")
 
 # Most specific first: the first matching class decides the status code.
 STATUS_BY_EXCEPTION = (
+    (AccountLockedError, 429),      # must come before AuthenticationError
     (AuthenticationError, 401),     # includes OneTimeCodeError
     (AuthorizationError, 403),
     (FileSizeExceededError, 413),

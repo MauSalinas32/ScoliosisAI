@@ -18,6 +18,8 @@ import secrets
 from datetime import datetime, timedelta
 from typing import List, Optional, Tuple
 
+from sqlalchemy import text
+
 from config.settings import SECRET_KEY
 from domain.interfaces.contracts import (
     IImageRepository,
@@ -33,6 +35,10 @@ from domain.interfaces.contracts import (
     UserRole,
 )
 from infrastructure.database import (
+    RevokedTokenDB,
+    LoginFailureDB,
+    _AUDIT_LOCK_KEY,
+    _is_sqlite,
     session_scope,
     MedicalImageDB,
     PredictionResultDB,
@@ -315,9 +321,24 @@ class AuditRepository(IAuditRepository):
     the immutability required by RNF-09 and RD-04.
     """
 
+    GENESIS_HASH = "0" * 64
+
+    @staticmethod
+    def compute_hash(prev_hash: str, db: AuditEntryDB) -> str:
+        """SHA-256 over the previous hash and the content of the entry (timestamp excluded on purpose: it is set by the database)."""
+        payload = "|".join([
+            prev_hash, db.action, str(db.user_id), db.resource_type, str(db.resource_id), db.details, str(db.ip_address),
+        ])
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
     def append(self, entry: AuditEntry) -> AuditEntry:
         try:
             with session_scope() as session:
+                if not _is_sqlite:
+                    # One writer at a time: otherwise two replicas would chain from the same previous entry
+                    session.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": _AUDIT_LOCK_KEY})
+                last = session.query(AuditEntryDB).order_by(AuditEntryDB.id.desc()).first()
+                prev_hash = (last.entry_hash if last and last.entry_hash else self.GENESIS_HASH)
                 db_entry = AuditEntryDB(
                     action=entry.action.value,
                     user_id=entry.user_id,
@@ -325,13 +346,30 @@ class AuditRepository(IAuditRepository):
                     resource_id=entry.resource_id,
                     details=entry.details,
                     ip_address=entry.ip_address,
+                    prev_hash=prev_hash,
                 )
+                db_entry.entry_hash = self.compute_hash(prev_hash, db_entry)
                 session.add(db_entry)
                 session.flush()
                 entry.id = db_entry.id
             return entry
         except Exception as e:
             raise RepositoryError("append_audit", str(e))
+
+    def verify_integrity(self) -> dict:
+        """Recompute the whole chain. Detects edited, deleted or re-ordered entries (not a replacement of the whole table)."""
+        with session_scope() as session:
+            prev = self.GENESIS_HASH
+            checked = 0
+            for row in session.query(AuditEntryDB).order_by(AuditEntryDB.id.asc()).yield_per(500):
+                if row.entry_hash is None:      # entries written before the chain existed
+                    continue
+                expected = self.compute_hash(prev, row)
+                if row.prev_hash != prev or row.entry_hash != expected:
+                    return {"valid": False, "entries_checked": checked, "first_invalid_id": row.id}
+                prev = row.entry_hash
+                checked += 1
+            return {"valid": True, "entries_checked": checked, "first_invalid_id": None}
 
     def find_all(
         self,
@@ -479,3 +517,41 @@ class OneTimeCodeRepository:
         if err_msg:
             raise OneTimeCodeError(err_msg)
         return True
+
+
+# ═══════════════════════════════════════════════════════════════
+# TokenRevocationRepository & LoginAttemptRepository (session security)
+# ═══════════════════════════════════════════════════════════════
+
+class TokenRevocationRepository:
+    """Stores the identifiers (jti) of tokens revoked at logout, shared by every replica."""
+
+    def revoke(self, jti: str, expires_at: datetime) -> None:
+        with session_scope() as session:
+            if not session.get(RevokedTokenDB, jti):
+                session.add(RevokedTokenDB(jti=jti, expires_at=expires_at))
+            # housekeeping: a revoked token that has expired is rejected by its own expiry anyway
+            session.query(RevokedTokenDB).filter(RevokedTokenDB.expires_at < datetime.utcnow()).delete(synchronize_session=False)
+
+    def is_revoked(self, jti: str) -> bool:
+        with session_scope() as session:
+            return session.get(RevokedTokenDB, jti) is not None
+
+
+class LoginAttemptRepository:
+    """Counts failed password attempts per username inside a time window (shared by every replica)."""
+
+    def record_failure(self, username: str) -> None:
+        with session_scope() as session:
+            session.add(LoginFailureDB(username=username[:64]))
+
+    def count_recent(self, username: str, minutes: int) -> int:
+        since = datetime.utcnow() - timedelta(minutes=minutes)
+        with session_scope() as session:
+            return session.query(LoginFailureDB).filter(
+                LoginFailureDB.username == username[:64], LoginFailureDB.created_at >= since
+            ).count()
+
+    def clear(self, username: str) -> None:
+        with session_scope() as session:
+            session.query(LoginFailureDB).filter(LoginFailureDB.username == username[:64]).delete(synchronize_session=False)

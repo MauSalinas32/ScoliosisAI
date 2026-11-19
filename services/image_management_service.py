@@ -6,6 +6,7 @@ images for subsequent processing.
 """
 
 import uuid
+from pathlib import Path
 from typing import Dict, Optional
 
 from domain.interfaces.contracts import (
@@ -70,7 +71,10 @@ class ImageManagementService:
             ImageValidationError: If the image fails Fail Fast validation.
         """
         safe_name = sanitize_filename(filename)
-        logger.info(f"Processing upload: {safe_name} ({len(file_data)} bytes)")
+        # Data minimisation: the name chosen by the sender (it may contain the patient's name) is used only to
+        # validate the extension. What is stored, logged, audited and printed in reports is a neutral identifier.
+        stored_label = f"image_{uuid.uuid4().hex[:10]}{Path(safe_name).suffix.lower()}"
+        logger.info(f"Processing upload: {stored_label} ({len(file_data)} bytes)")
 
         # Step 1: Run validation pipeline (Fail Fast)
         context = PipelineContext(
@@ -90,12 +94,12 @@ class ImageManagementService:
         # Step 2: Store the image. Direct identifiers never reach the disk: a DICOM file is scrubbed first.
         if is_dicom_bytes(file_data, safe_name):
             file_data = anonymize_dicom_bytes(file_data)
-        unique_filename = f"{uuid.uuid4().hex}_{safe_name}"
+        unique_filename = f"{uuid.uuid4().hex}_{stored_label}"
         stored_path = self._storage.store(file_data, unique_filename, "originals")
 
         # Step 3: Save metadata to database (with compensating disk cleanup if DB fails — Question 4)
         image = MedicalImage(
-            filename=safe_name,
+            filename=stored_label,
             original_path=stored_path,
             file_size_bytes=len(file_data),
             format=context.metadata.get("format", ""),
@@ -120,14 +124,14 @@ class ImageManagementService:
             user_id=uploaded_by,
             resource_type="medical_image",
             resource_id=saved_image.id,
-            details=f"Image '{safe_name}' uploaded and validated successfully",
+            details=f"Image '{stored_label}' uploaded and validated successfully",
         ))
 
         logger.info(f"Image uploaded successfully: ID={saved_image.id}")
 
         return {
             "image_id": saved_image.id,
-            "filename": safe_name,
+            "filename": stored_label,
             "validation": "passed",
             "stages_completed": context.stages_completed,
             "metadata": context.metadata,

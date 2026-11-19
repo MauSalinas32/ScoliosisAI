@@ -73,3 +73,7 @@ class AuditService:
             offset=offset,
             action=action_filter,
         )
+
+    def verify_integrity(self) -> dict:
+        """Recompute the hash chain of the audit log (detects edited or removed entries)."""
+        return self._audit_repo.verify_integrity()

@@ -260,6 +260,16 @@ jobs:
           kubectl -n medical-system rollout status statefulset/medical-ai-postgres --timeout=180s
           kubectl -n medical-system rollout status deployment/medical-ai-deployment --timeout=300s
 
+      - name: Scale the Deployment to 4 replicas in the cluster
+        # kind has no metrics-server, so the HPA is removed to let the manual scale stand (single-node cluster:
+        # this checks scheduling, readiness gating and the Service across replicas, not production capacity)
+        run: |
+          kubectl -n medical-system delete hpa medical-ai-hpa --ignore-not-found
+          kubectl -n medical-system scale deployment/medical-ai-deployment --replicas=4
+          kubectl -n medical-system rollout status deployment/medical-ai-deployment --timeout=420s
+          kubectl -n medical-system get pods -o wide | tee scale.txt
+          test "$(kubectl -n medical-system get pods -l app=medical-ai-app --field-selector=status.phase=Running --no-headers | wc -l)" -ge 4
+
       - name: Smoke test through the Service
         run: |
           kubectl -n medical-system port-forward svc/medical-ai-service 8080:80 &

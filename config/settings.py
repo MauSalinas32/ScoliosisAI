@@ -70,6 +70,10 @@ ALGORITHM = "HS256"
 CORS_ALLOWED_ORIGINS = [
     o.strip() for o in os.getenv("CORS_ALLOWED_ORIGINS", "" if ENVIRONMENT == "production" else "*").split(",") if o.strip()
 ]
+MIN_PASSWORD_LENGTH = int(os.getenv("MIN_PASSWORD_LENGTH", "8"))
+# Password-guessing protection: after this many failures a username is locked for the given time
+MAX_LOGIN_FAILURES = int(os.getenv("MAX_LOGIN_FAILURES", "5"))
+LOGIN_LOCKOUT_MINUTES = int(os.getenv("LOGIN_LOCKOUT_MINUTES", "15"))
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
 # One-time codes are printed to the console (simulated SMS) only outside production.
 OTP_LOG_CODES = os.getenv("OTP_LOG_CODES", "false" if ENVIRONMENT == "production" else "true").lower() in ("1", "true", "yes")

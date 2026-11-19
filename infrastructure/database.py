@@ -144,6 +144,27 @@ class AuditEntryDB(Base):
     details = Column(Text, nullable=False)
     timestamp = Column(DateTime, default=datetime.utcnow, index=True)
     ip_address = Column(String(50), nullable=True)
+    # Tamper evidence: each entry stores the hash of the previous one (hash chain)
+    prev_hash = Column(String(64), nullable=True)
+    entry_hash = Column(String(64), nullable=True)
+
+
+class RevokedTokenDB(Base):
+    """JWTs revoked before their expiry (logout). Rows can be purged once expired."""
+    __tablename__ = "revoked_tokens"
+
+    jti = Column(String(64), primary_key=True)
+    expires_at = Column(DateTime, nullable=False, index=True)
+    revoked_at = Column(DateTime, default=datetime.utcnow)
+
+
+class LoginFailureDB(Base):
+    """Failed password attempts per username (shared by every replica) for lockout."""
+    __tablename__ = "login_failures"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(64), nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
 
 class OneTimeCodeDB(Base):
@@ -181,6 +202,7 @@ class ModelVersionDB(Base):
 
 # Arbitrary constant shared by every replica: identifies the schema-creation advisory lock in PostgreSQL
 _SCHEMA_LOCK_KEY = 727274
+_AUDIT_LOCK_KEY = 727275  # serialises audit appends so the hash chain cannot fork between replicas
 
 
 def _create_schema():
@@ -198,6 +220,12 @@ def _create_schema():
                     cursor.execute("ALTER TABLE prediction_results ADD COLUMN curve_type VARCHAR(100)")
                 if "curve_detail" not in columns:
                     cursor.execute("ALTER TABLE prediction_results ADD COLUMN curve_detail TEXT")
+                cursor.execute("PRAGMA table_info(audit_log)")
+                audit_columns = [row[1] for row in cursor.fetchall()]
+                if "prev_hash" not in audit_columns:
+                    cursor.execute("ALTER TABLE audit_log ADD COLUMN prev_hash VARCHAR(64)")
+                if "entry_hash" not in audit_columns:
+                    cursor.execute("ALTER TABLE audit_log ADD COLUMN entry_hash VARCHAR(64)")
                 conn.connection.commit()
         except Exception:
             pass

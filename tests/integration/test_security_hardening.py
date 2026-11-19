@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 from PIL import Image
 
 from api.routes import _2fa_codes
+from tests.conftest import login_with_2fa
 
 
 def _start_login(client: TestClient, username: str):
@@ -137,3 +138,66 @@ class TestSelfRegistrationCannotEscalateRole:
         adm = client.post("/api/v1/auth/register", headers={"Authorization": f"Bearer {auth_tokens['admin']}"},
                           json={"username": "new_rad", "password": "Password123!", "full_name": "New Rad", "role": "radiologist"})
         assert adm.status_code == 200 and adm.json()["role"] == "radiologist"
+
+
+class TestSessionAndAccountProtection:
+    def test_logout_revokes_the_token_immediately(self, client):
+        token = login_with_2fa(client, "ml_engineer")
+        headers = {"Authorization": f"Bearer {token}"}
+        assert client.get("/api/v1/auth/me", headers=headers).status_code == 200
+        assert client.post("/api/v1/auth/logout", headers=headers).status_code == 200
+        res = client.get("/api/v1/auth/me", headers=headers)          # same token, before its expiry
+        assert res.status_code == 401 and "revoked" in res.json()["detail"].lower()
+
+    def test_password_guessing_locks_the_username(self, client):
+        client.post("/api/v1/auth/register", json={"username": "lock_victim", "password": "CorrectHorse1", "full_name": "Lock Victim"})
+        for _ in range(5):
+            assert client.post("/api/v1/auth/login", json={"username": "lock_victim", "password": "wrong-password"}).status_code == 401
+        # even the right password is refused while the lock lasts
+        res = client.post("/api/v1/auth/login", json={"username": "lock_victim", "password": "CorrectHorse1"})
+        assert res.status_code == 429
+
+    def test_unknown_usernames_are_counted_too(self, client):
+        for _ in range(5):
+            client.post("/api/v1/auth/login", json={"username": "does_not_exist_zz", "password": "x" * 10})
+        assert client.post("/api/v1/auth/login", json={"username": "does_not_exist_zz", "password": "x" * 10}).status_code == 429
+
+    @pytest.mark.parametrize("password", ["short", "1234567"])
+    def test_weak_passwords_are_rejected_at_registration(self, client, password):
+        res = client.post("/api/v1/auth/register", json={"username": f"weak_{len(password)}", "password": password, "full_name": "Weak"})
+        assert res.status_code == 400 and "at least 8" in res.json()["detail"]
+
+
+class TestAuditTrailIsTamperEvident:
+    def test_chain_is_valid_then_detects_an_edited_entry(self, client, auth_tokens):
+        headers = {"Authorization": f"Bearer {auth_tokens['admin']}"}
+        ok = client.get("/api/v1/audit/verify", headers=headers)
+        assert ok.status_code == 200 and ok.json()["valid"] is True and ok.json()["entries_checked"] > 0
+
+        from infrastructure.database import AuditEntryDB, session_scope
+        with session_scope() as session:                         # someone with database access edits history
+            row = session.query(AuditEntryDB).filter(AuditEntryDB.entry_hash.isnot(None)).order_by(AuditEntryDB.id.asc()).first()
+            row.details = row.details + " (edited)"
+            edited_id = row.id
+        bad = client.get("/api/v1/audit/verify", headers=headers).json()
+        assert bad["valid"] is False and bad["first_invalid_id"] == edited_id
+
+        with session_scope() as session:                         # restore so later tests see a valid chain
+            row = session.get(AuditEntryDB, edited_id)
+            row.details = row.details.replace(" (edited)", "")
+        assert client.get("/api/v1/audit/verify", headers=headers).json()["valid"] is True
+
+    def test_only_the_administrator_can_verify(self, client, auth_tokens):
+        for role in ("technician", "radiologist", "ml_engineer"):
+            res = client.get("/api/v1/audit/verify", headers={"Authorization": f"Bearer {auth_tokens[role]}"})
+            assert res.status_code == 403
+
+
+class TestSenderFileNamesAreNotStored:
+    def test_the_stored_name_is_neutral(self, client, auth_tokens, sample_xray_image):
+        res = client.post("/api/v1/images/upload", files={"file": ("GARCIA_LOPEZ_JUAN_1980.jpg", sample_xray_image, "image/jpeg")},
+                          headers={"Authorization": f"Bearer {auth_tokens['technician']}"})
+        assert res.status_code == 200
+        assert "GARCIA" not in res.json()["filename"]
+        listing = client.get("/api/v1/images", headers={"Authorization": f"Bearer {auth_tokens['technician']}"}).text
+        assert "GARCIA" not in listing

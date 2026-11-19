@@ -2,7 +2,7 @@
 
 [![CI/CD Pipeline](https://github.com/MauSalinas32/ScoliosisAI/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/MauSalinas32/ScoliosisAI/actions)
 [![Python Version](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-194%20passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-202%20passed-brightgreen.svg)]()
 [![Test Coverage](https://img.shields.io/badge/coverage-79%25-brightgreen.svg)]()
 [![Model Accuracy](https://img.shields.io/badge/accuracy-88.12%25-success.svg)]()
 [![Version](https://img.shields.io/badge/version-3.3.0-informational.svg)]()
@@ -74,7 +74,7 @@ Artifacts: [`models/scoliosis_classifier_v1.1.0/confusion_matrix.png`](models/sc
 |-- k8s/                          # Kubernetes manifests (kustomize)
 |-- pipeline/                     # Fail-fast preprocessing stages
 |-- services/                     # Auth, image mgmt, inference (Strategy/Decorator), clinical results, audit
-|-- tests/                        # 194 automated tests (unit, integration, security, profiling, system)
+|-- tests/                        # 202 automated tests (unit, integration, security, profiling, system)
 |-- utils/                        # Logging and exception hierarchy
 |-- Dockerfile / docker-compose.yml
 |-- requirements.txt / requirements-dev.txt
@@ -103,7 +103,7 @@ Default demo users (password `password123`): `radiologist`, `technician`, `admin
 ### Tests, evaluation and benchmark
 
 ```bash
-pytest -v --cov=services --cov=pipeline --cov=domain --cov=api --cov=infrastructure --cov=ai --cov-fail-under=75 tests/   # 194 tests
+pytest -v --cov=services --cov=pipeline --cov=domain --cov=api --cov=infrastructure --cov=ai --cov-fail-under=75 tests/   # 202 tests
 python ai/evaluate_model.py                       # recompute metrics on the test split
 python ai/plot_confusion_matrix.py                # confusion matrix chart
 python tests/profiling/benchmark_performance.py --iterations 20   # latency / throughput benchmark

@@ -15,6 +15,13 @@ Corrections found by auditing the 3.2.0 code against the Milestone 3 feedback (e
   - `/auth/forgot-password` answers identically for existing and unknown users (no account enumeration).
   - **Self-registration cannot escalate the role:** anyone could register as radiologist (the default option of the form) or ML engineer and then confirm diagnoses or read the audit trail. Anonymous registration is now limited to the technician role; any other role needs an administrator token (`TestSelfRegistrationCannotEscalateRole`).
   - **Only the radiologist can confirm or correct a diagnosis** (server returns 403 to technician, administrator and ML engineer; the UI hides the buttons accordingly).
+- **Session, account and audit hardening**
+  - JWTs carry an identifier (`jti`) and can be revoked: `POST /auth/logout` (the portal's *Sign Out* calls it) invalidates the token immediately; revoked identifiers are stored in the database, so every replica honours them.
+  - Password minimum raised from 6 to 8 characters (`MIN_PASSWORD_LENGTH`); password guessing is limited to 5 failures per username in 15 minutes (HTTP 429), counted in the database and also for unknown usernames.
+  - The audit log is a hash chain (each entry stores the hash of the previous one; appends are serialised): `GET /audit/verify` (administrator) detects edited or removed entries.
+  - The name chosen by the sender of an image (it may contain the patient's name) is no longer stored, logged, audited or printed in the report; a neutral identifier is used instead.
+  - Web portal: navigation, tabs and the upload area can be operated with the keyboard (they could not), focus indicator, announcements for alerts, text contrast fixed; `scripts/accessibility/audit.js` runs axe-core (WCAG 2.1 A/AA) and a keyboard-only login (`evidence/accessibility*.json`).
+  - Kubernetes: `topologySpreadConstraints` (the document said the replicas are spread across nodes, the manifest did not); the CI staging job scales the Deployment to 4 replicas in the kind cluster.
 - **Model robustness**
   - `ScoliosisStrategy.validate_input` rejects tensors outside `[0, 1]`, with the wrong shape, or with NaN/Inf (`HTTP 422`) instead of silently repairing them: feeding `[0, 255]` values used to return "S-curve, 100 %".
   - `ai/model_probe.py` (input-sensitivity probe) runs when a model is loaded: a model whose output does not react to its input is never served, even when its metadata says `approved: true`.
@@ -31,7 +38,7 @@ Corrections found by auditing the 3.2.0 code against the Milestone 3 feedback (e
   - Docker image: numeric UID/GID 10001 (matches the Kubernetes `securityContext`), one worker per container (TensorFlow memory against the 2 GiB pod limit); namespace labelled for Pod Security Admission (warn/audit `restricted`); ingress rate limit; `matplotlib` added to `requirements-dev.txt` (needed by `plot_confusion_matrix.py`).
   - Benchmark: the bottleneck is derived from the measurement (the old file always named inference although preprocessing was larger); `--iterations` / `--output` options; new `forward_pass_comparison.py` and `scripts/process_scaling.py`.
   - `.github/workflows/ci-cd.yml` added (lint, bandit, tests with coverage gate on SQLite and PostgreSQL, Docker smoke test, 2-replica test, Trivy, kubeconform, kind staging); `scripts/replica_test.sh` and `scripts/load_test.py` provide the replica / load evidence.
-- **Tests**: 194 tests (was 102), 79 % coverage, all passing from a clean clone; the suite now runs in an isolated temporary directory with the standard FastAPI `TestClient` (the home-made ASGI driver failed with other httpx versions and the tests wrote into the project's database).
+- **Tests**: 202 tests (was 102), 79 % coverage, all passing from a clean clone; the suite now runs in an isolated temporary directory with the standard FastAPI `TestClient` (the home-made ASGI driver failed with other httpx versions and the tests wrote into the project's database).
 
 ## [3.2.0] - Milestone 3 Consolidated: Model v1.1.0 Validation, Memory Optimization & Hardened RBAC
 - **AI Model Iteration `v1.1.0` & Quality Gate (Criterion 3 — Questions 1, 2, 9 & 10):**

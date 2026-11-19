@@ -12,12 +12,14 @@
             --primary-light: #3B82F6;
             --success: #10B981;
             --danger: #EF4444;
+            --danger-text: #B91C1C;   /* text on light backgrounds: >= 4.5:1 */
+            --link: #1D4ED8;
 
             /* LIGHT THEME DEFAULT */
             --bg-color: #F9FAFB;
             --card-color: #FFFFFF;
             --text-color: #1F2937;
-            --text-muted: #6B7280;
+            --text-muted: #4B5563;
             --border-color: #E5E7EB;
             --hover-color: rgba(30, 58, 138, 0.05);
             --sidebar-width: 280px;
@@ -29,9 +31,13 @@
             --card-color: #1F2937;
             --text-color: #FFFFFF;
             --text-muted: #9CA3AF;
+            --danger-text: #FCA5A5;
+            --link: #93C5FD;
             --border-color: #374151;
             --hover-color: rgba(255, 255, 255, 0.1);
         }
+
+        :focus-visible { outline: 3px solid var(--link); outline-offset: 2px; }
 
         * {
             box-sizing: border-box;
@@ -145,7 +151,7 @@
         /* HEADER BUTTONS: LOGOUT */
         .btn-logout {
             background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
+            color: var(--danger-text);
             border: 1px solid rgba(239, 68, 68, 0.2);
             padding: 0.5rem 1.25rem;
             border-radius: 999px;
@@ -403,7 +409,7 @@
     <div id="auth-view">
         <div class="auth-card">
             <div style="display: flex; justify-content: flex-end; margin-bottom: 0.75rem;">
-                <div class="lang-selector">
+                <div class="lang-selector" role="group" aria-label="Language">
                     <button type="button" class="lang-btn active" id="auth-lang-en" onclick="setLanguage('en')">EN</button>
                     <button type="button" class="lang-btn" id="auth-lang-es" onclick="setLanguage('es')">ES</button>
                 </div>
@@ -414,8 +420,8 @@
 
             <div id="tabs-container">
                 <div class="auth-tabs">
-                    <div class="auth-tab active" id="tab-btn-signin" onclick="switchAuthTab('login')">Sign In</div>
-                    <div class="auth-tab" id="tab-btn-register" onclick="switchAuthTab('register')">Register Staff</div>
+                    <div class="auth-tab active" id="tab-btn-signin" role="button" tabindex="0" onclick="switchAuthTab('login')">Sign In</div>
+                    <div class="auth-tab" id="tab-btn-register" role="button" tabindex="0" onclick="switchAuthTab('register')">Register Staff</div>
                 </div>
             </div>
 
@@ -433,7 +439,7 @@
                         required>
                 </div>
                 <div style="display: flex; justify-content: flex-end; margin-bottom: 1.25rem;">
-                    <a href="javascript:void(0)" id="link-forgot-pass" onclick="openForgotPassword()" style="font-size: 0.85rem; color: var(--primary-light); text-decoration: none; font-weight: 500; cursor: pointer;">
+                    <a href="javascript:void(0)" id="link-forgot-pass" onclick="openForgotPassword()" style="font-size: 0.85rem; color: var(--link); text-decoration: none; font-weight: 500; cursor: pointer;">
                         Forgot your password?
                     </a>
                 </div>
@@ -563,9 +569,9 @@
                 <p id="display-name" style="font-size: 0.85rem; color: var(--text-muted);">-</p>
             </div>
 
-            <nav>
-                <ul>
-                    <li id="nav-img" class="active" onclick="switchMainTab('img')">
+            <nav aria-label="Main navigation">
+                <ul role="tablist" aria-orientation="vertical">
+                    <li id="nav-img" class="active" role="tab" tabindex="0" aria-selected="true" onclick="switchMainTab('img')">
                         <svg style="width: 18px; margin-right: 12px; opacity: 0.8;" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -573,7 +579,7 @@
                         </svg>
                         <span id="txt-nav-img">Image Upload</span>
                     </li>
-                    <li id="nav-ai" onclick="switchMainTab('ai')">
+                    <li id="nav-ai" role="tab" tabindex="0" aria-selected="false" onclick="switchMainTab('ai')">
                         <svg style="width: 18px; margin-right: 12px; opacity: 0.8;" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -582,7 +588,7 @@
                         </svg>
                         <span id="txt-nav-ai">AI Classification</span>
                     </li>
-                    <li id="nav-results" onclick="switchMainTab('results')">
+                    <li id="nav-results" role="tab" tabindex="0" aria-selected="false" onclick="switchMainTab('results')">
                         <svg style="width: 18px; margin-right: 12px; opacity: 0.8;" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -591,7 +597,7 @@
                         </svg>
                         <span id="txt-nav-results">Clinical Results</span>
                     </li>
-                    <li id="nav-audit" onclick="switchMainTab('audit')">
+                    <li id="nav-audit" role="tab" tabindex="0" aria-selected="false" onclick="switchMainTab('audit')">
                         <svg style="width: 18px; margin-right: 12px; opacity: 0.8;" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -633,7 +639,7 @@
                 </ul>
                 <div id="upload-alert" class="alert"></div>
                 <form id="upload-form">
-                    <label for="file-upload" class="upload-area">
+                    <label for="file-upload" class="upload-area" role="button" tabindex="0">
                         <h3 id="txt-upload-title">Click Here to Upload Image</h3>
                         <p id="file-name" style="margin-top: 10px;">Select a DICOM, JPG, or PNG file</p>
                     </label>
@@ -1416,9 +1422,10 @@
         }
 
         function switchMainTab(tab) {
-            document.querySelectorAll('nav li').forEach(li => li.classList.remove('active'));
+            document.querySelectorAll('nav li').forEach(li => { li.classList.remove('active'); li.setAttribute('aria-selected', 'false'); });
             document.querySelectorAll('.tab-pane').forEach(tp => tp.classList.remove('active'));
             document.getElementById('nav-' + tab).classList.add('active');
+            document.getElementById('nav-' + tab).setAttribute('aria-selected', 'true');
             document.getElementById('tab-' + tab).classList.add('active');
             if (tab === 'results') fetchResults();
             if (tab === 'audit') fetchAudit();
@@ -1441,7 +1448,13 @@
             switchMainTab('img');
         }
 
-        function logout() { localStorage.clear(); location.reload(); }
+        async function logout() {
+            // revoke the token on the server first, so it cannot be reused before it expires
+            try {
+                if (token) await fetch(`${API_BASE}/auth/logout`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+            } catch (e) { /* the page is cleared anyway */ }
+            localStorage.clear(); location.reload();
+        }
 
         function translateMessage(msg) {
             if (!msg || typeof msg !== 'string') return msg;
@@ -2011,7 +2024,15 @@
                 })
                 .catch(() => {});
         }
-    </script>
+    
+        // ── Accessibility: keyboard operation and announcements ──
+        document.querySelectorAll('[role="button"][tabindex], [role="tab"][tabindex]').forEach(el => {
+            el.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
+            });
+        });
+        document.querySelectorAll('.alert').forEach(a => { a.setAttribute('role', 'alert'); a.setAttribute('aria-live', 'polite'); });
+</script>
 </body>
 
 </html>

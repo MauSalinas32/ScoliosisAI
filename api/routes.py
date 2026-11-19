@@ -29,6 +29,7 @@ from infrastructure.database import session_scope, UserDB
 from config.settings import OTP_LOG_CODES
 from pipeline.stages import decode_image, sanitize_filename
 from utils.exceptions import (
+    AccountLockedError,
     AuthenticationError,
     AuthorizationError,
     OneTimeCodeError,
@@ -241,6 +242,8 @@ def create_router(
         """
         try:
             user, code = auth_service.initiate_2fa_login(request.username, request.password)
+        except AccountLockedError as e:
+            raise HTTPException(status_code=429, detail=str(e))
         except AuthenticationError as e:
             raise HTTPException(status_code=401, detail=str(e))
         _deliver_otp("2FA", request.username, code)
@@ -276,6 +279,17 @@ def create_router(
             }
         except (OneTimeCodeError, AuthenticationError) as e:
             raise HTTPException(status_code=401, detail=str(e))
+
+    @router.post("/auth/logout", tags=["Authentication"])
+    async def logout(authorization: Optional[str] = Header(None)):
+        """Revoke the presented token so it stops working immediately (not only at its expiry)."""
+        payload = _authenticate_and_authorize(
+            authorization,
+            allowed_roles=[UserRole.TECHNICIAN, UserRole.RADIOLOGIST, UserRole.ADMIN, UserRole.ML_ENGINEER],
+            action_name="logout",
+        )
+        auth_service.revoke_token(payload)
+        return {"status": "logged_out"}
 
     @router.get("/auth/me", tags=["Authentication"])
     async def get_current_user_profile(authorization: Optional[str] = Header(None)):
@@ -761,6 +775,16 @@ def create_router(
         )
 
     # ── Audit Routes (Audit Service) ──────────────────────────
+
+    @router.get("/audit/verify", tags=["Audit"])
+    async def verify_audit_chain(authorization: Optional[str] = Header(None)):
+        """Recompute the hash chain of the audit log; reports the first entry that was edited or removed."""
+        _authenticate_and_authorize(
+            authorization,
+            allowed_roles=[UserRole.ADMIN],
+            action_name="verify_audit_chain",
+        )
+        return audit_service.verify_integrity()
 
     @router.get("/audit", tags=["Audit"])
     async def get_audit_trail(
