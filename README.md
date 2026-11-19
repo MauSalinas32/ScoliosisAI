@@ -68,7 +68,6 @@ Artifacts: [`models/scoliosis_classifier_v1.1.0/confusion_matrix.png`](models/sc
 |-- models/                       # Versioned model artefacts (v1.0.0 rejected, v1.1.0 approved)
 |-- scripts/                      # replica_test.sh, load_test.py, process_scaling.py, rbac_demo.py
 |-- evidence/                     # outputs of the test, benchmark, replica and RBAC runs
-|-- docs/                         # final deliverable (LaTeX source and PDF)
 |-- domain/                       # Entities and abstract contracts (DIP)
 |-- frontend/                     # Clinical web portal (HTML/CSS/JS, EN/ES)
 |-- infrastructure/               # Repositories, storage adapter, model registry
@@ -113,12 +112,6 @@ IMAGE=<image> bash scripts/replica_test.sh        # PostgreSQL + 2 replicas + lo
 ```
 
 Mean end-to-end CPU latency is ~153 ms per radiograph (RNF-01 target: < 3 s).
-
----
-
-## Documentation
-
-The final deliverable (Milestones 1 to 4) is [`docs/Entrega_Final_Hitos_1-4.pdf`](docs/Entrega_Final_Hitos_1-4.pdf); its LaTeX source is in [`docs/latex/`](docs/latex/). Every figure of the document comes from a file in [`evidence/`](evidence/) or [`models/`](models/).
 
 ---
 

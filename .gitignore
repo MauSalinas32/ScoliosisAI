@@ -21,13 +21,3 @@ test-results.xml
 .idea/
 .DS_Store
 Thumbs.db
-# LaTeX build files
-docs/latex/*.aux
-docs/latex/*.log
-docs/latex/*.toc
-docs/latex/*.out
-docs/latex/*.fls
-docs/latex/*.fdb_latexmk
-docs/latex/*.synctex.gz
-docs/latex/*.lof
-docs/latex/*.lot

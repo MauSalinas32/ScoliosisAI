@@ -1,0 +1,77 @@
+\babel@toc {english}{}\relax 
+\contentsline {section}{How to Read This Document}{4}{Doc-Start}%
+\contentsline {section}{MILESTONE 1: THEORETICAL DESIGN}{5}{Doc-Start}%
+\contentsline {section}{\numberline {1}Problem Statement and Objectives}{5}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Problem Context}{5}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Stakeholders}{5}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Project Objectives}{5}{subsection.1.3}%
+\contentsline {section}{\numberline {2}Functional and Non-Functional Requirements}{6}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Functional Requirements}{6}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Non-Functional Requirements}{7}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Domain Rules}{8}{subsection.2.3}%
+\contentsline {section}{\numberline {3}System Architecture Design}{8}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Architectural Style: Modular Monolith with Dependency Inversion}{8}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}The Six Canonical Services}{11}{subsection.3.2}%
+\contentsline {section}{\numberline {4}Design Patterns Applied}{12}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Preprocessing Pipeline}{13}{subsection.4.1}%
+\contentsline {section}{\numberline {5}SOLID and Engineering Principles}{14}{section.5}%
+\contentsline {section}{\numberline {6}Data Model}{15}{section.6}%
+\contentsline {section}{\numberline {7}System Modeling}{15}{section.7}%
+\contentsline {subsection}{\numberline {7.1}AI Workflow Diagram}{15}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}UML Use Case Diagram}{17}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}UML Component Diagram}{18}{subsection.7.3}%
+\contentsline {section}{\numberline {8}Technical Justification}{19}{section.8}%
+\contentsline {section}{MILESTONE 2: IMPLEMENTATION}{20}{table.caption.14}%
+\contentsline {section}{\numberline {9}Milestone 1 Corrections Summary}{20}{section.9}%
+\contentsline {section}{\numberline {10}Technology Stack and Project Structure}{20}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Technology Stack}{21}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}Project Directory Structure}{21}{subsection.10.2}%
+\contentsline {section}{\numberline {11}Data Pipeline Implementation}{22}{section.11}%
+\contentsline {section}{\numberline {12}AI Module: MobileNetV2 Transfer Learning}{22}{section.12}%
+\contentsline {subsection}{\numberline {12.1}Dataset and Label Derivation}{22}{subsection.12.1}%
+\contentsline {subsection}{\numberline {12.2}Model and Training Configuration}{23}{subsection.12.2}%
+\contentsline {subsection}{\numberline {12.3}Inference Logic: CNN Diagnosis plus Geometric Review Flag}{24}{subsection.12.3}%
+\contentsline {section}{\numberline {13}Inference Engine and Application Workflow}{25}{section.13}%
+\contentsline {section}{\numberline {14}Authentication and Security}{26}{section.14}%
+\contentsline {section}{\numberline {15}Error Handling, Logging and Robustness}{28}{section.15}%
+\contentsline {section}{\numberline {16}Code Efficiency}{29}{section.16}%
+\contentsline {section}{\numberline {17}Version Control and Collaborative Development}{29}{section.17}%
+\contentsline {section}{MILESTONE 3: TESTING, VALIDATION AND DEPLOYMENT}{30}{section.17}%
+\contentsline {section}{\numberline {18}Criterion 1: Corrections and Improvements from Milestone 2}{30}{section.18}%
+\contentsline {section}{\numberline {19}Criterion 2: Software Testing Strategy}{30}{section.19}%
+\contentsline {subsection}{\numberline {19.1}Strategy and Isolation}{30}{subsection.19.1}%
+\contentsline {subsection}{\numberline {19.2}Test Suite Summary}{31}{subsection.19.2}%
+\contentsline {subsection}{\numberline {19.3}Memory Profiling}{33}{subsection.19.3}%
+\contentsline {section}{\numberline {20}Criterion 3: AI Model Validation and Error Analysis}{33}{section.20}%
+\contentsline {subsection}{\numberline {20.1}What Is Evaluated}{33}{subsection.20.1}%
+\contentsline {subsection}{\numberline {20.2}Model Lifecycle: v1.0.0 (Rejected) and v1.1.0 (Approved)}{33}{subsection.20.2}%
+\contentsline {subsection}{\numberline {20.3}Error Analysis}{35}{subsection.20.3}%
+\contentsline {subsection}{\numberline {20.4}Improvements Implemented for Iteration v1.1.0}{35}{subsection.20.4}%
+\contentsline {subsection}{\numberline {20.5}Model Acceptance Checks and How the Corrections Are Verified}{36}{subsection.20.5}%
+\contentsline {section}{\numberline {21}Criterion 4: CI/CD Implementation}{37}{section.21}%
+\contentsline {section}{\numberline {22}Criterion 5: Containerisation and Deployment}{38}{section.22}%
+\contentsline {subsection}{\numberline {22.1}Docker}{38}{subsection.22.1}%
+\contentsline {subsection}{\numberline {22.2}Kubernetes}{39}{subsection.22.2}%
+\contentsline {subsection}{\numberline {22.3}Replica Test with Real Containers}{41}{subsection.22.3}%
+\contentsline {section}{\numberline {23}Criterion 6: Performance and Scalability Analysis}{42}{section.23}%
+\contentsline {subsection}{\numberline {23.1}Methodology}{42}{subsection.23.1}%
+\contentsline {subsection}{\numberline {23.2}Latency and Throughput}{42}{subsection.23.2}%
+\contentsline {subsection}{\numberline {23.3}Bottleneck and Optimisations Applied}{43}{subsection.23.3}%
+\contentsline {subsection}{\numberline {23.4}Scaling Is Not Linear: Measurements and Limits}{43}{subsection.23.4}%
+\contentsline {section}{\numberline {24}Criterion 7: Technical Evidence and Consistency}{45}{section.24}%
+\contentsline {subsection}{\numberline {24.1}Evidence Artefacts}{45}{subsection.24.1}%
+\contentsline {subsection}{\numberline {24.2}The Running System}{46}{subsection.24.2}%
+\contentsline {subsection}{\numberline {24.3}Rubric Traceability}{46}{subsection.24.3}%
+\contentsline {subsection}{\numberline {24.4}Feature Classification by Implementation Tier}{48}{subsection.24.4}%
+\contentsline {section}{\numberline {25}Response to the Milestone 3 Review}{48}{section.25}%
+\contentsline {section}{MILESTONE 4: ETHICAL, LEGAL AND SOCIAL ASPECTS OF AI SOFTWARE}{51}{table.caption.46}%
+\contentsline {section}{\numberline {26}Criterion 1: Documentation of Corrections from Milestone 3}{51}{section.26}%
+\contentsline {section}{\numberline {27}Criterion 2: Ethical Considerations in AI Software Development}{53}{section.27}%
+\contentsline {section}{\numberline {28}Criterion 3: Bias, Fairness and Responsible AI}{55}{section.28}%
+\contentsline {section}{\numberline {29}Criterion 4: Data Privacy, Security and Legal Compliance}{56}{section.29}%
+\contentsline {subsection}{\numberline {29.1}Applicable Framework}{56}{subsection.29.1}%
+\contentsline {subsection}{\numberline {29.2}How Personal and Sensitive Information Is Protected}{58}{subsection.29.2}%
+\contentsline {section}{\numberline {30}Criterion 5: Social Impact and Accessibility}{59}{section.30}%
+\contentsline {section}{\numberline {31}Criterion 6: Responsible Deployment and Risk Mitigation}{60}{section.31}%
+\contentsline {section}{\numberline {32}Criterion 7: Final Integration, Technical Consistency and Conclusions}{61}{section.32}%
+\contentsline {section}{References}{63}{table.caption.55}%
