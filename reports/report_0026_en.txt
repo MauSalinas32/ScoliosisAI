@@ -1,0 +1,16 @@
+============================================================
+       CLINICAL SCOLIOSIS EVALUATION REPORT
+============================================================
+
+Report ID: RPT-0026
+Filename: paciente_escoliosis_grave_en_c_1.jpg
+Diagnosis: ESCOLIOSIS GRAVE (EN C)
+Affected Vertebrae: T7 - T11
+Curve Type: Curvatura en C (Simple)
+Clinical Detail: Curvatura simple en forma de 'C' en segmento torácico con ápex en T9.
+Confidence Score: 76.77%
+AI Model: scoliosis_classifier v1.0.0
+Processing Time: 1683.0 ms
+Review Status: pending_review
+Specialist Reviewer: Dr. Smith
+Clinical Notes: No notes provided
